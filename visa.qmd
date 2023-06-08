@@ -1,0 +1,47 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+execute: 
+  warning: false
+---
+```{r}
+#| include: false
+oldwd <- getwd()
+setwd('~/Desktop/visa-lago/')
+source(knitr::purl('explore.qmd'))
+setwd(oldwd)
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 6
+plot_model(country_level_2022, year = 2022, gdp_year = 2021)
+```
+
+:::: {.grid}
+
+::: {.g-col-12 .g-col-md-6}
+
+### Data Sources
+
+Data on short-term visa applications and rejection rate are released publicly by the Directorate-General for Migration and Home Affairs of the European Commission, and are [available on their website](https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/visa-policy_en#paragraph_1903).
+
+Data on GDP per capita are estimated and made available by the World Bank, [on their website](https://datacatalog.worldbank.org/search/dataset/0037712/World-Development-Indicators). We have used the “GDP per capita, at purchasing power parity (current international $)” indicator as a basic measurement indicating average wealth per nation.
+Data Analysis
+
+:::
+
+::: {.g-col-12 .g-col-md-6}
+
+### Data Analysis
+
+We have used ISO3166 alpha-3-codes to merge the data in the two datasets, relying on the R package [countrycode](https://joss.theoj.org/papers/10.21105/joss.00848) to convert country names into country codes when needed.
+
+The regression line uses a [binomial generalised linear model](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/00Index.html) to estimate conservatively how much we can expect the application rejection rate to increase when the GDP per capita of the originating country decreases. 
+
+African countries are often outliers, with rejection rates well above what is expected by the regression line.
+
+:::
+
+::::
