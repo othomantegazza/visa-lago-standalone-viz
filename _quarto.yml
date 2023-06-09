@@ -1,5 +1,5 @@
 project:
-  title: "visa-lago-standalone-viz"
+  title: "Visa Rejection Rate"
   type: website
   output-dir: docs
   preview:
@@ -15,7 +15,7 @@ format:
     margin-right: 30px
     margin-bottom: 10px
     fontsize: 16px
-    
+
 
 
 
