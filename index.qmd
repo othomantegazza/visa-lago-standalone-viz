@@ -43,6 +43,7 @@ Scatterplot(country_level_2022,
   {
     x: d => d.gdp_per_capita,
     y: d => d.ratio_rejected,
+    r: d => d.tot_request,
     width: width,
     height: height,
   }
