@@ -38,11 +38,6 @@ ojs_define(
 height = 500
 ```
 
-
-```{ojs}
-country_level_2022
-```
-
 ```{ojs} 
 Scatterplot(country_level_2022,
   {
