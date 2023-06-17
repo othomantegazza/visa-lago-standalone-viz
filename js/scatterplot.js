@@ -4,7 +4,7 @@
 function Scatterplot(data, {
       x = ([x]) => x, // given d in data, returns the (quantitative) x-value
       y = ([y]) => y, // given d in data, returns the (quantitative) y-value
-      r = ([r]) => r, // given d in data, returns the (quantitative) radius
+      r = ([r]) => r, // given d in data, returns the (quantitative) radius, mapping the value to the area
       fill = ([fill]) => fill,
       marginTop = 25, // top margin, in pixels
       marginRight = 0, // right margin, in pixels
@@ -20,12 +20,14 @@ function Scatterplot(data, {
       minWidth = 375,
       xType = d3.scaleLinear, // type of x-scale
       xDomain, // [xmin, xmax]
+      xLabel = "GDP per capita from the previous year, in equivalent US dollars [$] →", // a label for the x-axis
+      xFormat, // a format specifier string for the x-axis
       yType = d3.scaleLinear, // type of y-scale
       yDomain, // [ymin, ymax]
-      xLabel = "GDP per capita from the previous year, in equivalent US dollars [$] →", // a label for the x-axis
       yLabel= "↑ Percent of Application Rejected [%]", // a label for the y-axis
-      xFormat, // a format specifier string for the x-axis
       yFormat, // a format specifier string for the y-axis
+      rType = d3.scaleLinear,
+      rDomain, 
       fillType,
       fillDomain, // [fillmin, fillmid, fillmax]
       fillRange,
@@ -50,19 +52,25 @@ function Scatterplot(data, {
       // Define scales parameters and build data variables
       const xRange = [marginLeft + insetLeft, width - marginRight - insetRight] // [left, right]
       const yRange = [height - marginBottom - insetBottom, marginTop + insetTop] // [bottom, top]
-      const X = d3.map(data, x);
-      const Y = d3.map(data, y);
-      const I = d3.range(X.length).filter(i => !isNaN(X[i]) && !isNaN(Y[i]))
+      const rRange = [0, 20]
+      const X = d3.map(data, x)
+      const Y = d3.map(data, y)
+      const R = d3.map(data, r)
+      const I = d3.range(data.length)
+
+      console.log({R})
 
       // Compute default domains.
-      if (xDomain === undefined) xDomain = [0, d3.max(X)];
-      if (yDomain === undefined) yDomain = [0, d3.max(Y)];
+      if (xDomain === undefined) xDomain = [0, d3.max(X)]
+      if (yDomain === undefined) yDomain = [0, d3.max(Y)]
+      if (rDomain === undefined) rDomain = [0, d3.max(R)]
 
       // Construct scales and axes.
-      const xScale = xType(xDomain, xRange);
-      const yScale = yType(yDomain, yRange);
-      const xAxis = d3.axisBottom(xScale).ticks(width / 80, xFormat);
-      const yAxis = d3.axisLeft(yScale).ticks(height / 50, yFormat);
+      const xScale = xType(xDomain, xRange)
+      const yScale = yType(yDomain, yRange)
+      const rScale = rType(rDomain, rRange)
+      const xAxis = d3.axisBottom(xScale).ticks(width / 80, xFormat)
+      const yAxis = d3.axisLeft(yScale).ticks(height / 50, yFormat)
 
       console.log({x, y, xRange, yRange, X, Y, I, xDomain, yDomain})
 
@@ -117,8 +125,8 @@ function Scatterplot(data, {
             .join("circle")
             .attr("cx", i => xScale(X[i]))
             .attr("cy", i => yScale(Y[i]))
-            .attr("r", 3)
-            .attr("fill", "black")
+            .attr("r", i => Math.sqrt(rScale(R[i]/Math.PI)))
+            .attr("fill", "#00000066")
             //.attr("id", i => dateForID(X[i]))
 
       //function pointermoved(event) { 
