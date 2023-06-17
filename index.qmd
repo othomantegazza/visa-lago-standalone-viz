@@ -5,6 +5,10 @@ editor_options:
 execute: 
   warning: false
 ---
+<!--- js dependencies -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="js/scatterplot.js"></script>
+
 ```{r}
 #| include: false
 oldwd <- getwd()
@@ -12,6 +16,44 @@ setwd('~/Desktop/visa-lago/')
 source(knitr::purl('explore.qmd'))
 setwd(oldwd)
 ```
+
+```{r}
+ojs_define(
+  country_level_2022 = country_level_2022 %>% 
+    select(
+      consulate_country,
+      tot_request,
+      gdp_per_capita,
+      ratio_rejected,
+      .fitted
+    ) %>% 
+    drop_na() %>% 
+    {
+    transpose(.l = .)
+  }
+)
+```
+
+```{ojs}
+height = 500
+```
+
+
+```{ojs}
+country_level_2022
+```
+
+```{ojs} 
+Scatterplot(country_level_2022,
+  {
+    x: d => d.gdp_per_capita,
+    y: d => d.ratio_rejected,
+    width: width,
+    height: height,
+  }
+)
+```
+
 
 ```{r}
 #| fig-width: 12
