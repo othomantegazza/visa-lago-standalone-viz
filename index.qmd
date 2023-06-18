@@ -22,6 +22,7 @@ ojs_define(
   country_level_2022 = country_level_2022 %>% 
     select(
       consulate_country,
+      consulate_country_continent,
       tot_request,
       gdp_per_capita,
       ratio_rejected,
@@ -36,6 +37,16 @@ ojs_define(
 
 ```{ojs}
 height = 500
+cb_palette = {
+  let cb_palette = {
+  Africa: "#228833",
+  Americas: "#CCBB44",
+  Asia: "#4477AA",
+  Europe: "#EE6677",
+  Oceania: "#AA3377",
+  }
+  return cb_palette
+}
 ```
 
 ```{ojs} 
@@ -43,7 +54,9 @@ Scatterplot(country_level_2022,
   {
     x: d => d.gdp_per_capita,
     y: d => d.ratio_rejected,
-    area: d => d.tot_request, 
+    area: d => d.tot_request,
+    fill: d => d.consulate_country_continent,
+    fillPalette: cb_palette,
     width: width,
     height: height,
   }

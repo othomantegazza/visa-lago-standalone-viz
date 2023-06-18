@@ -29,10 +29,7 @@ function Scatterplot(data, {
       rType = d3.scaleLinear,
       rDomain, 
       rRange = [0, 10],
-      fillType,
-      fillDomain, // [fillmin, fillmid, fillmax]
-      fillRange,
-      fillPalette,
+      fillPalette, // an object with named colour
       curve = d3.curveLinear,  // method of interpolation between points
       fontSize = 14,
       fontTickReducer = 0.9,
@@ -60,11 +57,9 @@ function Scatterplot(data, {
       const X = d3.map(data, x)
       const Y = d3.map(data, y)
       const AREA = d3.map(data, area)
-      console.log({AREA})
       const R = d3.map(AREA, radius_from_area)
+      const FILL = d3.map(data, fill)
       const I = d3.range(data.length)
-
-      console.log({AREA, R})
 
       // Compute default domains.
       if (xDomain === undefined) xDomain = [0, d3.max(X)]
@@ -78,7 +73,7 @@ function Scatterplot(data, {
       const xAxis = d3.axisBottom(xScale).ticks(width / 80, xFormat)
       const yAxis = d3.axisLeft(yScale).ticks(height / 50, yFormat)
 
-      console.log({x, y, xRange, yRange, X, Y, I, xDomain, yDomain})
+      console.log({x, y, xRange, yRange, X, Y, I, xDomain, yDomain, FILL, fillPalette, America: fillPalette["Europe"]})
 
       const tooltip = d3.select("body")
             .append("div")
@@ -132,7 +127,7 @@ function Scatterplot(data, {
             .attr("cx", i => xScale(X[i]))
             .attr("cy", i => yScale(Y[i]))
             .attr("r", i => rScale(R[i]))
-            .attr("fill", "#00000066")
+            .attr("fill", i => fillPalette[FILL[i]])
             //.attr("id", i => dateForID(X[i]))
 
       //function pointermoved(event) { 
