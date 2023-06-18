@@ -193,7 +193,14 @@ function Scatterplot(data, {
         .join("path")
         .attr("d", i => voronoi.renderCell(i))
         .attr("id", i => ID[i])
+        .style("pointer-events", "all")
+        .on("mouseover", (e) => mouseover(e))
 
+    function mouseover(e) {
+        console.log({e})
+        d3.select(e.target).attr("fill", "yellow")
+
+    }
 
     //function pointermoved(event) { 
     //
