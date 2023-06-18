@@ -97,7 +97,7 @@ function Scatterplot(data, {
         .from(dataForVoronoi)
         .voronoi(voronoiRange);
 
-    console.log({dataForVoronoi, range: [xRange[0], yRange[0], xRange[1], yRange[1]]})
+    console.log({dataForVoronoi, voronoiShow, render: voronoi.render(), renderCell: voronoi.renderCell(1)})
 
 
     console.log({
@@ -176,10 +176,20 @@ function Scatterplot(data, {
             //.attr("id", i => dateForID(X[i]))
 
         // voronoi grid
+        if(voronoiShow) {
+            var voronoiStroke = '#00000088'
+        } else {
+            var voronoiStroke = 'none'
+        }
         svg.append("g")
-            .attr("stroke", '#00000044')
-            .append("path")
-            .attr("d", voronoi.render())
+            .attr("stroke", voronoiStroke)
+            .attr("fill", "none")
+            // .append("path")
+            // .attr("d", voronoi.render())
+            .selectAll("path")
+            .data(I)
+            .join("path")
+            .attr("d", i => voronoi.renderCell(i))
 
 
       //function pointermoved(event) { 
