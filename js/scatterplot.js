@@ -4,7 +4,7 @@
 function Scatterplot(data, {
       x = ([x]) => x, // given d in data, returns the (quantitative) x-value
       y = ([y]) => y, // given d in data, returns the (quantitative) y-value
-      r = ([r]) => r, // given d in data, returns the (quantitative) radius, mapping the value to the area
+      area = ([area]) => area, // given d in data, returns the (quantitative) radius, mapping the value to the area
       fill = ([fill]) => fill,
       marginTop = 25, // top margin, in pixels
       marginRight = 0, // right margin, in pixels
@@ -28,6 +28,7 @@ function Scatterplot(data, {
       yFormat, // a format specifier string for the y-axis
       rType = d3.scaleLinear,
       rDomain, 
+      rRange = [0, 10],
       fillType,
       fillDomain, // [fillmin, fillmid, fillmax]
       fillRange,
@@ -43,22 +44,27 @@ function Scatterplot(data, {
       highlightColor = '#b72dfc'
 } = {}) {
 
-    
+    function radius_from_area(A) {
+        return Math.sqrt(A/Math.PI)
+    }
+
       // Compute page layout values
       if (width < minWidth) {
             width = minWidth
       }
 
+
       // Define scales parameters and build data variables
       const xRange = [marginLeft + insetLeft, width - marginRight - insetRight] // [left, right]
       const yRange = [height - marginBottom - insetBottom, marginTop + insetTop] // [bottom, top]
-      const rRange = [0, 20]
       const X = d3.map(data, x)
       const Y = d3.map(data, y)
-      const R = d3.map(data, r)
+      const AREA = d3.map(data, area)
+      console.log({AREA})
+      const R = d3.map(AREA, radius_from_area)
       const I = d3.range(data.length)
 
-      console.log({R})
+      console.log({AREA, R})
 
       // Compute default domains.
       if (xDomain === undefined) xDomain = [0, d3.max(X)]
@@ -125,7 +131,7 @@ function Scatterplot(data, {
             .join("circle")
             .attr("cx", i => xScale(X[i]))
             .attr("cy", i => yScale(Y[i]))
-            .attr("r", i => Math.sqrt(rScale(R[i]/Math.PI)))
+            .attr("r", i => rScale(R[i]))
             .attr("fill", "#00000066")
             //.attr("id", i => dateForID(X[i]))
 
