@@ -26,7 +26,7 @@ ojs_define(
       tot_request,
       gdp_per_capita,
       ratio_rejected,
-      .fitted
+      fitted = .fitted
     ) %>% 
     drop_na() %>% 
     {
@@ -56,6 +56,7 @@ Scatterplot(country_level_2022,
     y: d => d.ratio_rejected,
     area: d => d.tot_request,
     fill: d => d.consulate_country_continent,
+    fitted: d => d.fitted,
     fillPalette: cb_palette,
     width: width,
     height: height,

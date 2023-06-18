@@ -5,6 +5,7 @@ function Scatterplot(data, {
       x = ([x]) => x, // given d in data, returns the (quantitative) x-value
       y = ([y]) => y, // given d in data, returns the (quantitative) y-value
       area = ([area]) => area, // given d in data, returns the (quantitative) radius, mapping the value to the area
+      fitted = ([fitted]) => fitted,
       fill = ([fill]) => fill,
       marginTop = 25, // top margin, in pixels
       marginRight = 0, // right margin, in pixels
@@ -46,11 +47,18 @@ function Scatterplot(data, {
         return Math.sqrt(A/Math.PI)
     }
 
+    // var test = [1, 222, 22]
+    // var result = Array.from(test.keys()).sort(function(a, b) {return test[a]-test[b]})
+
+    function orderIndex(v) {
+        const result = Array.from(v.keys()).sort(function (a, b) { return v[a] - v[b] })
+        return (result)
+    }
+
       // Compute page layout values
       if (width < minWidth) {
             width = minWidth
       }
-
 
       // Define scales parameters and build data variables
       const xRange = [marginLeft + insetLeft, width - marginRight - insetRight] // [left, right]
@@ -60,7 +68,9 @@ function Scatterplot(data, {
       const AREA = d3.map(data, area)
       const R = d3.map(AREA, radius_from_area)
       const FILL = d3.map(data, fill)
+      const FITTED = d3.map(data, fitted)
       const I = d3.range(data.length)
+      let ORDER = orderIndex(X)
 
       // Compute default domains.
       if (xDomain === undefined) xDomain = [0, d3.max(X)]
@@ -74,13 +84,19 @@ function Scatterplot(data, {
       const xAxis = d3.axisBottom(xScale).ticks(width / 80, xFormat)
       const yAxis = d3.axisLeft(yScale).ticks(height / 50, yFormat)
 
-      console.log({x, y, xRange, yRange, X, Y, I, xDomain, yDomain, FILL, fillPalette, America: fillPalette["Europe"]})
+    // line generator function
+    line = d3.line()
+        .x(i => xScale(X[i]))
+        .y(i => yScale(FITTED[i]))
 
+      console.log({x, y, xRange, yRange, X, Y, I, xDomain, yDomain, FILL, FITTED, fillPalette, ORDER, America: fillPalette["Europe"]})
+
+      // generate tooltip
       const tooltip = d3.select("body")
             .append("div")
             .attr("id", "scatter-tooltip")
 
-
+      // generate SVG
       const svg = d3.create("svg")
             .attr("width", width)
             .attr("height", height)
@@ -118,6 +134,14 @@ function Scatterplot(data, {
                   .attr("x", -marginLeft)
                   .attr("y", 10)
                   .text(yLabel));
+
+      // line from fitted values
+      svg.append("g")
+        .append("path")
+        .attr("fill", 'none')
+        .attr("stroke", 'black')
+        .attr("stroke-dasharray", "6 2")
+        .attr("d", line(ORDER));
 
       // circles    
       svg.append("g")
