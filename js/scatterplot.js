@@ -7,6 +7,7 @@ function Scatterplot(data, {
     area = ([area]) => area, // given d in data, returns the (quantitative) radius, mapping the value to the area
     fitted = ([fitted]) => fitted,
     fill = ([fill]) => fill,
+    id = ([id]) => id,
     marginTop = 25, // top margin, in pixels
     marginRight = 0, // right margin, in pixels
     marginBottom = 40, // bottom margin, in pixels
@@ -70,6 +71,7 @@ function Scatterplot(data, {
     const R = d3.map(AREA, radius_from_area)
     const FILL = d3.map(data, fill)
     const FITTED = d3.map(data, fitted)
+    const ID = d3.map(data, id)
     const I = d3.range(data.length)
     let ORDER = orderIndex(X)
 
@@ -108,6 +110,7 @@ function Scatterplot(data, {
         FILL, FITTED, fillPalette, ORDER,
         America: fillPalette["Europe"],
         voronoi,
+        ID,
     })
 
     // generate tooltip
@@ -173,6 +176,7 @@ function Scatterplot(data, {
         .attr("r", i => rScale(R[i]))
         .attr("fill", i => fillPalette[FILL[i]])
         .attr("fill-opacity", fillOpacity)
+        .attr("id", i => ID[i])
     //.attr("id", i => dateForID(X[i]))
 
     // voronoi grid
@@ -184,12 +188,11 @@ function Scatterplot(data, {
     svg.append("g")
         .attr("stroke", voronoiStroke)
         .attr("fill", "none")
-        // .append("path")
-        // .attr("d", voronoi.render())
         .selectAll("path")
         .data(I)
         .join("path")
         .attr("d", i => voronoi.renderCell(i))
+        .attr("id", i => ID[i])
 
 
     //function pointermoved(event) { 
