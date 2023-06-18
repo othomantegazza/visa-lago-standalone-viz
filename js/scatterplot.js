@@ -30,6 +30,7 @@ function Scatterplot(data, {
       rDomain, 
       rRange = [0, 10],
       fillPalette, // an object with named colour
+      fillOpacity = 0.9,
       curve = d3.curveLinear,  // method of interpolation between points
       fontSize = 14,
       fontTickReducer = 0.9,
@@ -128,6 +129,7 @@ function Scatterplot(data, {
             .attr("cy", i => yScale(Y[i]))
             .attr("r", i => rScale(R[i]))
             .attr("fill", i => fillPalette[FILL[i]])
+            .attr("fill-opacity", fillOpacity)
             //.attr("id", i => dateForID(X[i]))
 
       //function pointermoved(event) { 
