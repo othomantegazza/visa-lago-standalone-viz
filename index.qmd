@@ -60,6 +60,7 @@ Scatterplot(country_level_2022,
     fillPalette: cb_palette,
     width: width,
     height: height,
+    voronoiShow: true,
   }
 )
 ```

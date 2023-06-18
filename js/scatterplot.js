@@ -40,7 +40,8 @@ function Scatterplot(data, {
       halo = "#fff", // color of label halo 
       haloWidth = 3, // padding around the labels,
       tooltipBackground = 'black',
-      highlightColor = '#b72dfc'
+      highlightColor = '#b72dfc',
+      voronoiShow = false,
 } = {}) {
 
     function radius_from_area(A) {
@@ -89,7 +90,25 @@ function Scatterplot(data, {
         .x(i => xScale(X[i]))
         .y(i => yScale(FITTED[i]))
 
-      console.log({x, y, xRange, yRange, X, Y, I, xDomain, yDomain, FILL, FITTED, fillPalette, ORDER, America: fillPalette["Europe"]})
+    // voronoi generator
+    const dataForVoronoi = d3.map(I, i => [xScale(X[i]), yScale(Y[i])])
+    const voronoiRange = [xRange[0], yRange[1],xRange[1], yRange[0]]
+    const voronoi = d3.Delaunay
+        .from(dataForVoronoi)
+        .voronoi(voronoiRange);
+
+    console.log({dataForVoronoi, range: [xRange[0], yRange[0], xRange[1], yRange[1]]})
+
+
+    console.log({
+        x, y,
+        xRange, yRange,
+        X, Y, I,
+        xDomain, yDomain,
+        FILL, FITTED, fillPalette, ORDER,
+        America: fillPalette["Europe"],
+        voronoi,
+    })
 
       // generate tooltip
       const tooltip = d3.select("body")
@@ -155,6 +174,13 @@ function Scatterplot(data, {
             .attr("fill", i => fillPalette[FILL[i]])
             .attr("fill-opacity", fillOpacity)
             //.attr("id", i => dateForID(X[i]))
+
+        // voronoi grid
+        svg.append("g")
+            .attr("stroke", '#00000044')
+            .append("path")
+            .attr("d", voronoi.render())
+
 
       //function pointermoved(event) { 
 //
