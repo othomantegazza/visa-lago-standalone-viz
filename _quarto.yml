@@ -2,6 +2,8 @@ project:
   title: "Visa Rejection Rate"
   type: website
   output-dir: docs
+  render:
+    - index.qmd
   preview:
     port: 4200
 
