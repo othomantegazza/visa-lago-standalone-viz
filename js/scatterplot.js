@@ -125,6 +125,7 @@ function Scatterplot(data, {
         .append("div")
         .style("position", "absolute")
         .attr("id", "scatter-tooltip")
+        .style("transition", "0.1s")
 
     // generate SVG
     const svg = d3.create("svg")
