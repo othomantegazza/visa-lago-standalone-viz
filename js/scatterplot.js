@@ -227,8 +227,8 @@ function Scatterplot(data, {
         // var circleY = selectedCircle.attributes.cy.value
         // var circleR = selectedCircle.attributes.r.value
 
-        var circleX = selectedCircle.x + selectedCircle.width + scrollX
-        var circleY = selectedCircle.y + scrollY
+        var circleX = selectedCircle.x + selectedCircle.width + scrollX + 5
+        var circleY = selectedCircle.y + scrollY - 25
         
         console.log({ e, targetID , selectedCircle, circleX, circleY})
         
