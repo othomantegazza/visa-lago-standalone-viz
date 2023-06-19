@@ -30,17 +30,17 @@ function Scatterplot(data, {
     yFormat, // a format specifier string for the y-axis
     rType = d3.scaleLinear,
     rDomain,
-    rRange = [0, 10],
+    rRange = [0, 20],
     fillPalette, // an object with named colour
     fillOpacity = 0.9,
     curve = d3.curveLinear,  // method of interpolation between points
     fontSize = 14,
     fontTickReducer = 0.9,
-    stroke = "currentColor", // stroke color for the dots
-    strokeWidth = 1.5, // stroke width for dots
+    strokeWidth = 2.5, // stroke width for dots
     halo = "#fff", // color of label halo 
     haloWidth = 3, // padding around the labels,
     tooltipBackground = 'black',
+    tooltipOffset = 10,
     highlightColor = '#b72dfc',
     voronoiShow = false,
 } = {}) {
@@ -116,6 +116,7 @@ function Scatterplot(data, {
     // generate tooltip
     const tooltip = d3.select("body")
         .append("div")
+        .style("position", "absolute")
         .attr("id", "scatter-tooltip")
 
     // generate SVG
@@ -194,13 +195,50 @@ function Scatterplot(data, {
         .attr("d", i => voronoi.renderCell(i))
         .attr("id", i => ID[i])
         .style("pointer-events", "all")
-        .on("mouseover", (e) => mouseover(e))
+        .on("mousemove", (e) => mousemove(e))
+        .on("mouseout", (e) => mouseout(e))
 
-    function mouseover(e) {
-        console.log({e})
-        d3.select(e.target).attr("fill", "yellow")
+    function mousemove(e) {
 
-    }
+        const targetID = e.explicitOriginalTarget.id
+        console.log({e, targetID})
+        // d3.select(e.target).attr("fill", "yellow")
+
+        d3.select('div#scatter-tooltip')
+            .style("visibility", "visible")
+            .style("top", `${e.pageY + tooltipOffset}px`)
+            .style("left", `${e.pageX + tooltipOffset}px`)
+            .html(`<div>${targetID}</div>`)
+
+        d3.select(`circle#${targetID}`)
+            .attr("stroke", "red")
+            .attr("stroke-width", strokeWidth)
+        }
+
+    function mouseout(e) {
+
+        const targetID = e.target.id
+
+        console.log({e, targetID})
+
+        d3.select('div#scatter-tooltip')
+            .style("visibility", "hidden")
+            
+        d3.select(`circle#${targetID}`)
+            .attr("stroke", "none")
+        }
+    //            .attr("class", "svg-tooltip")
+    //            .attr("id", "tooltip-scatter")
+    //            .style("visibility", "hidden")
+    //            .style('top', event.pageY + 'px')
+    //            .style(fromCorner, cornerDist)
+    //            .style("visibility", "visible")
+    //            .html(`${dateLabel}
+    //                  <table id="table-scatterplot">
+    //                  <th></th><th>µg/m<sup>3</sup></th><th>limits(%)</th>
+    //                  ${poll_levels_string}
+    //                  </table>`)
+
 
     //function pointermoved(event) { 
     //

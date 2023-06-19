@@ -20,6 +20,9 @@ setwd(oldwd)
 ```{r}
 ojs_define(
   country_level_2022 = country_level_2022 %>% 
+    mutate(
+      consulate_country = consulate_country %>% str_replace_all(" ", "-")
+    ) %>% 
     select(
       consulate_country,
       consulate_country_continent,
@@ -61,7 +64,7 @@ Scatterplot(country_level_2022,
     fillPalette: cb_palette,
     width: width,
     height: height,
-    voronoiShow: true,
+    voronoiShow: false,
   }
 )
 ```
