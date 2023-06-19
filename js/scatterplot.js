@@ -30,7 +30,7 @@ function Scatterplot(data, {
     yFormat, // a format specifier string for the y-axis
     rType = d3.scaleLinear,
     rDomain,
-    rRange = [0, 20],
+    rRange = [0, 15],
     fillPalette, // an object with named colour
     fillOpacity = 0.9,
     curve = d3.curveLinear,  // method of interpolation between points
