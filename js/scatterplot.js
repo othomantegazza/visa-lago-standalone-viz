@@ -195,10 +195,15 @@ function Scatterplot(data, {
         .attr("d", i => voronoi.renderCell(i))
         .attr("id", i => ID[i])
         .style("pointer-events", "all")
-        .on("mousemove", (e) => mousemove(e))
+        .on("mousemove touchstart", (e) => mousemove(e))
         .on("mouseout", (e) => mouseout(e))
 
     function mousemove(e) {
+
+        d3.select("circle.selected")
+            .attr("class", null)
+            .attr("stroke", "none")
+            
 
         const targetID = e.explicitOriginalTarget.id
         console.log({e, targetID})
@@ -211,6 +216,7 @@ function Scatterplot(data, {
             .html(`<div>${targetID}</div>`)
 
         d3.select(`circle#${targetID}`)
+            .attr("class", "selected")
             .attr("stroke", "red")
             .attr("stroke-width", strokeWidth)
         }
