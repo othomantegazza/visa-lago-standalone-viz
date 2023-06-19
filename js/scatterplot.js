@@ -211,7 +211,7 @@ function Scatterplot(data, {
 
         d3.select('div#scatter-tooltip')
             .style("visibility", "visible")
-            .style("top", `${e.pageY + tooltipOffset}px`)
+            .style("top", `${e.pageY - tooltipOffset*2}px`)
             .style("left", `${e.pageX + tooltipOffset}px`)
             .html(`<div>${targetID}</div>`)
 
