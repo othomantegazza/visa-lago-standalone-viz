@@ -125,8 +125,7 @@ function Scatterplot(data, {
         .attr("height", height)
         .attr("viewBox", [0, 0, width, height])
         .attr("style", `max-width: 100%`)
-    // .on("mousemove touchmove", pointermoved)
-    // .on("pointerout", pointerleft);       
+        .attr("style", "cursor: crosshair;")       
 
     // axis x                  
     svg.append("g")
