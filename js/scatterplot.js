@@ -8,10 +8,10 @@ function Scatterplot(data, {
     fitted = ([fitted]) => fitted,
     fill = ([fill]) => fill,
     id = ([id]) => id,
-    marginTop = 25, // top margin, in pixels
-    marginRight = 0, // right margin, in pixels
-    marginBottom = 40, // bottom margin, in pixels
-    marginLeft = 45, // left margin, in pixels
+    marginTop = 40, // top margin, in pixels
+    marginRight = 10, // right margin, in pixels
+    marginBottom = 50, // bottom margin, in pixels
+    marginLeft = 50, // left margin, in pixels
     inset = 0, // inset the default range, in pixels
     insetTop = inset, // inset the default y-range
     insetRight = inset, // inset the default x-range
