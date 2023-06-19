@@ -219,17 +219,24 @@ function Scatterplot(data, {
         d3.select("circle.selected")
             .attr("class", null)
             .attr("stroke", "none")
-            
 
         const targetID = e.target.id
-        console.log({e, targetID})
+        var selectedCircle = d3.select(`circle#${targetID}`).node().attributes
+        
+        var circleX = selectedCircle.cx.value
+        var circleY = selectedCircle.cy.value
+        var circleR = selectedCircle.r.value
+        
+        console.log({ e, targetID , selectedCircle, circleX, circleY, circleR})
         
         // d3.select(e.target).attr("fill", "yellow")
 
         d3.select('div#scatter-tooltip')
             .style("visibility", "visible")
-            .style("top", `${e.pageY - tooltipOffset*2}px`)
-            .style("left", `${e.pageX + tooltipOffset}px`)
+            // .style("top", `${e.pageY - tooltipOffset * 2}px`)
+            // .style("left", `${e.pageX + tooltipOffset}px`)
+            .style("top", `${circleY - circleR}px`)
+            .style("left", `${circleX}px`)
             .html(`<div>${targetID}</div>`)
 
         d3.select(`circle#${targetID}`)
