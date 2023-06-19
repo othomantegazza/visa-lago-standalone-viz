@@ -76,8 +76,8 @@ function Scatterplot(data, {
     let ORDER = orderIndex(X)
 
     // Compute default domains.
-    if (xDomain === undefined) xDomain = [0, d3.max(X)]
-    if (yDomain === undefined) yDomain = [0, d3.max(Y)]
+    if (xDomain === undefined) xDomain = [0, d3.max(X) + d3.max(X)*0.02]
+    if (yDomain === undefined) yDomain = [0, d3.max(Y) + d3.max(Y)*0.02]
     if (rDomain === undefined) rDomain = [0, d3.max(R)]
 
     // Construct scales and axes.
