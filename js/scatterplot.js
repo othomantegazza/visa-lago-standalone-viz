@@ -150,7 +150,7 @@ function Scatterplot(data, {
             .attr("y", marginBottom - 4)
             .attr("font-size", fontSize)
             .attr("fill", "currentColor")
-            .attr("text-anchor", "end") 
+            .attr("text-anchor", "end")
             .text(xLabel));
 
     // axis y
@@ -162,7 +162,8 @@ function Scatterplot(data, {
             .attr("x2", width - marginLeft - marginRight)
             .attr("stroke-opacity", 0.1))
         .call(g => g.selectAll(".tick text")
-            .attr("font-size", fontSize))
+            .attr("font-size", fontSize)
+            .attr("dy", 0.1))
         .call(g => g.append("text")
           .attr("x", -marginLeft)
           .attr("y", fontSize)
