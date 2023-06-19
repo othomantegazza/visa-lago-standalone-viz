@@ -5,7 +5,17 @@
 
 /*-- scss:rules --*/
 
+html {
+    padding: 20pt;
+  }
+
 body {
     max-width: 1000px;
     margin: auto;
+}
+
+div#scatter-tooltip {
+    backdrop-filter: blur(30px);
+    border-radius: 10%;
+    padding: 0px 2px 0px 2px;
 }
