@@ -84,8 +84,8 @@ function Scatterplot(data, {
     let ORDER = orderIndex(X)
 
     // Compute default domains.
-    if (xDomain === undefined) xDomain = [0, d3.max(X) + d3.max(X)*0.02]
-    if (yDomain === undefined) yDomain = [0, d3.max(Y) + d3.max(Y)*0.02]
+    if (xDomain === undefined) xDomain = [0, d3.max(X) + d3.max(X) * 0.02]
+    if (yDomain === undefined) yDomain = [0, d3.max(Y) + d3.max(Y) * 0.02]
     if (rDomain === undefined) rDomain = [0, d3.max(R)]
 
     // Construct scales and axes.
@@ -167,12 +167,12 @@ function Scatterplot(data, {
             .attr("font-size", fontSize)
             .attr("dy", 0.1))
         .call(g => g.append("text")
-          .attr("x", -marginLeft)
-          .attr("y", fontSize)
-          .attr("fill", "currentColor")
-          .attr("text-anchor", "start")
-          .attr("font-size", fontSize)
-          .text(yLabel))
+            .attr("x", -marginLeft)
+            .attr("y", fontSize)
+            .attr("fill", "currentColor")
+            .attr("text-anchor", "start")
+            .attr("font-size", fontSize)
+            .text(yLabel))
 
     // line from fitted values
     svg.append("g")
@@ -237,20 +237,21 @@ function Scatterplot(data, {
             .attr("stroke", "red")
             .attr("stroke-width", strokeWidth)
             .raise()
-        }
+
+    }
 
     function mouseout(e) {
 
         const targetID = e.target.id
 
-        console.log({e, targetID})
+        console.log({ e, targetID })
 
         d3.select('div#scatter-tooltip')
             .style("visibility", "hidden")
-            
+
         d3.select(`circle#${targetID}`)
             .attr("stroke", "none")
-        }
+    }
     //            .attr("class", "svg-tooltip")
     //            .attr("id", "tooltip-scatter")
     //            .style("visibility", "hidden")
