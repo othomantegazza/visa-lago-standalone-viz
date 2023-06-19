@@ -205,8 +205,9 @@ function Scatterplot(data, {
             .attr("stroke", "none")
             
 
-        const targetID = e.explicitOriginalTarget.id
+        const targetID = e.target.id
         console.log({e, targetID})
+        
         // d3.select(e.target).attr("fill", "yellow")
 
         d3.select('div#scatter-tooltip')
