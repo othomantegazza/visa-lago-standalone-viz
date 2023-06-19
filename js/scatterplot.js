@@ -109,7 +109,6 @@ function Scatterplot(data, {
 
     console.log({ dataForVoronoi, voronoiShow, render: voronoi.render(), renderCell: voronoi.renderCell(1) })
 
-
     console.log({
         x, y,
         xRange, yRange,
@@ -132,6 +131,7 @@ function Scatterplot(data, {
         .attr("width", width)
         .attr("height", height)
         .attr("viewBox", [0, 0, width, height])
+        .attr("id", "svgscatter")
         .attr("style", `max-width: 100%`)
         .attr("style", "cursor: crosshair; margin: auto; display: block;")
 
@@ -212,7 +212,7 @@ function Scatterplot(data, {
         .attr("id", i => ID[i])
         .style("pointer-events", "all")
         .on("mousemove touchstart", (e) => mousemove(e))
-        .on("mouseout", (e) => mouseout(e))
+        //.on("mouseout", (e) => mouseout(e))
 
     function mousemove(e) {
 
@@ -221,13 +221,16 @@ function Scatterplot(data, {
             .attr("stroke", "none")
 
         const targetID = e.target.id
-        var selectedCircle = d3.select(`circle#${targetID}`).node().attributes
+        var selectedCircle = d3.select(`circle#${targetID}`).node().getBoundingClientRect()
         
-        var circleX = selectedCircle.cx.value
-        var circleY = selectedCircle.cy.value
-        var circleR = selectedCircle.r.value
+        // var circleX = selectedCircle.attributes.cx.value
+        // var circleY = selectedCircle.attributes.cy.value
+        // var circleR = selectedCircle.attributes.r.value
+
+        var circleX = selectedCircle.x + selectedCircle.width + scrollX
+        var circleY = selectedCircle.y + scrollY
         
-        console.log({ e, targetID , selectedCircle, circleX, circleY, circleR})
+        console.log({ e, targetID , selectedCircle, circleX, circleY})
         
         // d3.select(e.target).attr("fill", "yellow")
 
@@ -235,7 +238,7 @@ function Scatterplot(data, {
             .style("visibility", "visible")
             // .style("top", `${e.pageY - tooltipOffset * 2}px`)
             // .style("left", `${e.pageX + tooltipOffset}px`)
-            .style("top", `${circleY - circleR}px`)
+            .style("top", `${circleY}px`)
             .style("left", `${circleX}px`)
             .html(`<div>${targetID}</div>`)
 
