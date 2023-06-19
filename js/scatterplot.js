@@ -140,6 +140,9 @@ function Scatterplot(data, {
         .call(g => g.append("text")
             .attr("x", width)
             .attr("y", marginBottom - 4)
+            .attr("font-size", fontSize)
+            .attr("fill", "currentColor")
+            .attr("text-anchor", "end") 
             .text(xLabel));
 
     // axis y
@@ -153,9 +156,12 @@ function Scatterplot(data, {
         .call(g => g.selectAll(".tick text")
             .attr("font-size", fontSize))
         .call(g => g.append("text")
-            .attr("x", -marginLeft)
-            .attr("y", 10)
-            .text(yLabel));
+          .attr("x", -marginLeft)
+          .attr("y", fontSize)
+          .attr("fill", "currentColor")
+          .attr("text-anchor", "start")
+          .attr("font-size", fontSize)
+          .text(yLabel))
 
     // line from fitted values
     svg.append("g")
