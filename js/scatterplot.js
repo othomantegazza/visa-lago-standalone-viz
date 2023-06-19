@@ -219,6 +219,7 @@ function Scatterplot(data, {
             .attr("class", "selected")
             .attr("stroke", "red")
             .attr("stroke-width", strokeWidth)
+            .raise()
         }
 
     function mouseout(e) {
