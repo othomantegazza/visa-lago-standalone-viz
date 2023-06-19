@@ -19,7 +19,8 @@ function Scatterplot(data, {
     insetLeft = inset, // inset the default x-range
     width = 640, // outer width, in pixels
     height = 400, // outer height, in pixels
-    minWidth = 375,
+    minWidth = 450,
+    maxWidth = 1000,
     xType = d3.scaleLinear, // type of x-scale
     xDomain, // [xmin, xmax]
     xLabel = "GDP per capita from the previous year, in equivalent US dollars [$] →", // a label for the x-axis
@@ -60,6 +61,10 @@ function Scatterplot(data, {
     // Compute page layout values
     if (width < minWidth) {
         width = minWidth
+    }
+    var xoffset = 0
+    if (width > maxWidth) {
+        width = maxWidth
     }
 
     // function  that formats y axis text
@@ -128,7 +133,7 @@ function Scatterplot(data, {
         .attr("height", height)
         .attr("viewBox", [0, 0, width, height])
         .attr("style", `max-width: 100%`)
-        .attr("style", "cursor: crosshair;")       
+        .attr("style", "cursor: crosshair; margin: auto; display: block;")
 
     // axis x                  
     svg.append("g")
