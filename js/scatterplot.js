@@ -8,6 +8,7 @@ function Scatterplot(data, {
     fitted = ([fitted]) => fitted,
     fill = ([fill]) => fill,
     id = ([id]) => id,
+    label = ([label]) => label,
     marginTop = 40, // top margin, in pixels
     marginRight = 10, // right margin, in pixels
     marginBottom = 50, // bottom margin, in pixels
@@ -80,6 +81,7 @@ function Scatterplot(data, {
     const FILL = d3.map(data, fill)
     const FITTED = d3.map(data, fitted)
     const ID = d3.map(data, id)
+    const LABEL = d3.map(data, label)
     const I = d3.range(data.length)
     let ORDER = orderIndex(X)
 
@@ -117,7 +119,7 @@ function Scatterplot(data, {
         FILL, FITTED, fillPalette, ORDER,
         America: fillPalette["Europe"],
         voronoi,
-        ID,
+        ID, LABEL
     })
 
     // generate tooltip
@@ -222,6 +224,9 @@ function Scatterplot(data, {
             .attr("stroke", "none")
 
         const targetID = e.target.id
+
+        const labelID = LABEL[ID.indexOf(targetID)]
+
         var selectedCircle = d3.select(`circle#${targetID}`).node().getBoundingClientRect()
         
         // var circleX = selectedCircle.attributes.cx.value
@@ -231,7 +236,7 @@ function Scatterplot(data, {
         var circleX = selectedCircle.x + selectedCircle.width + scrollX + 5
         var circleY = selectedCircle.y + scrollY - 25
         
-        console.log({ e, targetID , selectedCircle, circleX, circleY})
+        console.log({ e, targetID, labelID, selectedCircle, circleX, circleY})
         
         // d3.select(e.target).attr("fill", "yellow")
 
@@ -241,7 +246,7 @@ function Scatterplot(data, {
             // .style("left", `${e.pageX + tooltipOffset}px`)
             .style("top", `${circleY}px`)
             .style("left", `${circleX}px`)
-            .html(`<div>${targetID}</div>`)
+            .html(`<div>${labelID}</div>`)
 
         d3.select(`circle#${targetID}`)
             .attr("class", "selected")
@@ -254,8 +259,6 @@ function Scatterplot(data, {
     function mouseout(e) {
 
         const targetID = e.target.id
-
-        console.log({ e, targetID })
 
         d3.select('div#scatter-tooltip')
             .style("visibility", "hidden")
