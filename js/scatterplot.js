@@ -62,6 +62,9 @@ function Scatterplot(data, {
         width = minWidth
     }
 
+    // function  that formats y axis text
+    const formatPercent = d3.format(".0%")
+
     // Define scales parameters and build data variables
     const xRange = [marginLeft + insetLeft, width - marginRight - insetRight] // [left, right]
     const yRange = [height - marginBottom - insetBottom, marginTop + insetTop] // [bottom, top]
@@ -85,7 +88,7 @@ function Scatterplot(data, {
     const yScale = yType(yDomain, yRange)
     const rScale = rType(rDomain, rRange)
     const xAxis = d3.axisBottom(xScale).ticks(width / 80, xFormat)
-    const yAxis = d3.axisLeft(yScale).ticks(height / 50, yFormat)
+    const yAxis = d3.axisLeft(yScale).ticks(height / 50, yFormat).tickFormat(formatPercent)
 
     // line generator function
     line = d3.line()
