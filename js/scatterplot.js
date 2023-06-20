@@ -109,6 +109,7 @@ function Scatterplot(data, {
         .from(dataForVoronoi)
         .voronoi(voronoiRange);
 
+    console.log({FILL, fillPalette})
     // console.log({ dataForVoronoi, voronoiShow, render: voronoi.render(), renderCell: voronoi.renderCell(1) })
 
     // console.log({
@@ -197,15 +198,14 @@ function Scatterplot(data, {
         .attr("fill", i => fillPalette[FILL[i]])
         .attr("fill-opacity", fillOpacity)
         .attr("id", i => ID[i])
-    //.attr("id", i => dateForID(X[i]))
 
-    // voronoi grid
-    if (voronoiShow) {
-        var voronoiStroke = '#00000088'
-    } else {
-        var voronoiStroke = 'none'
-    }
-    svg.append("g")
+        // voronoi grid
+        if (voronoiShow) {
+            var voronoiStroke = '#00000088'
+        } else {
+            var voronoiStroke = 'none'
+        }
+        svg.append("g")
         .attr("stroke", voronoiStroke)
         .attr("fill", "none")
         .selectAll("path")
@@ -215,7 +215,29 @@ function Scatterplot(data, {
         .attr("id", i => ID[i])
         .style("pointer-events", "all")
         .on("mousemove touchstart", (e) => mousemove(e))
-        //.on("mouseout", (e) => mouseout(e))
+        
+        // legend colors
+        // function getUniqueValues(array) {
+        //     return [...new Set(array)].sort()
+        // }
+        // const fillItems = getUniqueValues(FILL)
+        const fillKeys = Object.keys(fillPalette)
+        function guideY(i) {
+            return yScale(yDomain[1]*0.9) + fillKeys.indexOf(i)*30
+        }
+
+        console.log({FILL, fillKeys })
+    svg.append("g")
+        .attr("id", "legend-color")
+        .attr("fill", "white")
+        .selectAll("circle")
+        .data(fillKeys)
+        .join("circle")
+        .attr("fill", i => fillPalette[i])
+        .attr("cx", xScale(xDomain[1]*0.9))
+        .attr("cy", i => guideY(i))
+        .attr("r", 7)
+
 
     function mousemove(e) {
 
