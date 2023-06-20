@@ -225,7 +225,18 @@ function Scatterplot(data, {
     const guideX = xScale(xDomain[1] * 0.9)
     const guideColorTextYOffset = 3.5
     const guideColorTextXOffset = 10
-    const guideSizeYOffset = 70
+    const guideSizeYOffset = 90
+    const guideFontSizeMult = .7
+    const guideSizeTickLength = 20
+
+    // Guide color Title
+    guide.append("g")
+        .append("text")
+        .attr("id", "guidetitle")
+        .attr("x", guideX - 19)
+        .attr("y", guideY(fillKeys.at(0)) - 20)
+        .attr("font-size", fontSize)
+        .text("Continent")
 
     // Guide color colors
     guide.append("g")
@@ -239,14 +250,22 @@ function Scatterplot(data, {
 
     // Guide color text
     guide.append("g")
-        .attr("font-size", fontSize*0.7)
+        .attr("font-size", fontSize*guideFontSizeMult)
         .selectAll("text")
         .data(fillKeys)
         .join("text")
         .attr("x", guideX + guideColorTextXOffset)
         .attr("y", i => guideY(i) + guideColorTextYOffset)
-        // .attr("font-size", fontSize)
         .text(i => i)
+
+    // guide size title
+    guide.append("g")
+        .append("text")
+        .attr("id", "guidetitle")
+        .attr("x", guideX - 19)
+        .attr("y", guideY(fillKeys.at(-1)) + guideSizeYOffset - 50)
+        .attr("font-size", fontSize)
+        .text("Request Lodged")
 
     // guide size sizes
     guide.append("g")
@@ -265,7 +284,7 @@ function Scatterplot(data, {
         .data(guideSizeBreaks)
         .join("line")
         .attr("x1", guideX )
-        .attr("x2", guideX + 20)
+        .attr("x2", guideX + guideSizeTickLength)
         .attr("y1", i => sizeGuideCircleY(i, 2))
         .attr("y2", i => sizeGuideCircleY(i, 2))
         .attr("stroke", "black")
@@ -273,13 +292,13 @@ function Scatterplot(data, {
 
     // guide size text 
     guide.append("g")
-        .attr("font-size", fontSize*0.7)
+        .attr("font-size", fontSize*guideFontSizeMult)
         .selectAll("text")
         .data(guideSizeBreaks)
         .join("text")
-        .attr("x", guideX + 20)
+        .attr("x", guideX + guideSizeTickLength)
         .attr("y", i => sizeGuideCircleY(i, 2))
-        .text(i => i)
+        .text(i => d3.format(".1s")(i))
 
 
     function mousemove(e) {
