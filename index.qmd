@@ -72,13 +72,6 @@ Scatterplot(country_level_2022,
 )
 ```
 
-
-```{r}
-#| fig-width: 12
-#| fig-height: 6
-plot_model(country_level_2022, year = 2022, gdp_year = 2021)
-```
-
 :::: {.grid}
 
 ::: {.g-col-12 .g-col-md-6}
