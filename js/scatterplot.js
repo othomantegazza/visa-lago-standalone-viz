@@ -35,15 +35,8 @@ function Scatterplot(data, {
     rRange = [0, 15],
     fillPalette, // an object with named colour
     fillOpacity = 0.9,
-    curve = d3.curveLinear,  // method of interpolation between points
     fontSize = 14,
-    fontTickReducer = 0.9,
     strokeWidth = 2.5, // stroke width for dots
-    halo = "#fff", // color of label halo 
-    haloWidth = 3, // padding around the labels,
-    tooltipBackground = 'black',
-    tooltipOffset = 10,
-    highlightColor = '#b72dfc',
     voronoiShow = false,
 } = {}) {
 
