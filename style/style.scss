@@ -16,7 +16,11 @@ body {
 }
 
 div#scatter-tooltip {
+    border: 1px;
+    border-style: solid;
+    border-color: red;
     backdrop-filter: blur(30px);
-    border-radius: 10%;
+    -webkit-backdrop-filter: blur(30px);
+    border-radius: 3px;
     padding: 0px 2px 0px 2px;
 }

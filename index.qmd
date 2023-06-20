@@ -20,11 +20,9 @@ setwd(oldwd)
 ```{r}
 ojs_define(
   country_level_2022 = country_level_2022 %>% 
-    mutate(
-      consulate_country = consulate_country %>% str_replace_all(" ", "-")
-    ) %>% 
     select(
       consulate_country,
+      consulate_country_code,
       consulate_country_continent,
       tot_request,
       gdp_per_capita,
@@ -52,6 +50,10 @@ cb_palette = {
 }
 ```
 
+## Schengen Visa Rejection Rate in 2022
+
+(By country in which the visa application was lodged)
+
 ```{ojs} 
 Scatterplot(country_level_2022,
   {
@@ -59,7 +61,8 @@ Scatterplot(country_level_2022,
     y: d => d.ratio_rejected,
     area: d => d.tot_request,
     fill: d => d.consulate_country_continent,
-    id: d => d.consulate_country,
+    id: d => d.consulate_country_code,
+    label: d => d.consulate_country,
     fitted: d => d.fitted,
     fillPalette: cb_palette,
     width: width,
