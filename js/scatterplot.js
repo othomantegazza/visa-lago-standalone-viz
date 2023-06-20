@@ -227,9 +227,10 @@ function Scatterplot(data, {
         }
 
         console.log({FILL, fillKeys })
-    svg.append("g")
-        .attr("id", "legend-color")
-        .attr("fill", "white")
+
+    guide = svg.append("g").attr("id", "legend-color")
+    
+    guide.append("g")
         .selectAll("circle")
         .data(fillKeys)
         .join("circle")
@@ -237,6 +238,15 @@ function Scatterplot(data, {
         .attr("cx", xScale(xDomain[1]*0.9))
         .attr("cy", i => guideY(i))
         .attr("r", 7)
+
+    guide.append("g")
+        .selectAll("text")
+        .data(fillKeys)
+        .join("text")
+        .attr("x", xScale(xDomain[1]*0.90 + 2000))
+        .attr("y", i => guideY(i) + 3.5)
+        .attr("font-size", fontSize)
+        .text(i => i)
 
 
     function mousemove(e) {
