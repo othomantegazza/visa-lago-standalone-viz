@@ -37,6 +37,7 @@ function Scatterplot(data, {
     fillOpacity = 0.9,
     fontSize = 14,
     strokeWidth = 2.5, // stroke width for dots
+    guideSizeBreaks = [10000, 100000, 500000, 1000000],
     voronoiShow = false,
 } = {}) {
 
@@ -209,37 +210,53 @@ function Scatterplot(data, {
         .style("pointer-events", "all")
         .on("mousemove touchstart", (e) => mousemove(e))
         
-        // legend colors
-        // function getUniqueValues(array) {
-        //     return [...new Set(array)].sort()
-        // }
-        // const fillItems = getUniqueValues(FILL)
-        const fillKeys = Object.keys(fillPalette)
-        function guideY(i) {
-            return yScale(yDomain[1]*0.9) + fillKeys.indexOf(i)*30
-        }
 
-        console.log({FILL, fillKeys })
+    // Guides
+    const fillKeys = Object.keys(fillPalette)
+    function guideY(i) {
+        return yScale(yDomain[1] * 0.9) + fillKeys.indexOf(i) * 30
+    }
+    console.log({ FILL, fillKeys })
+    const guide = svg.append("g").attr("id", "legend")
+    const guideX = xScale(xDomain[1] * 0.9)
+    const guideColorTextYOffset = 3.5
+    const guideColorTextXOffset = 10
+    const guideSizeYOffset = 70
 
-    guide = svg.append("g").attr("id", "legend-color")
-    
+    // Guide color colors
     guide.append("g")
         .selectAll("circle")
         .data(fillKeys)
         .join("circle")
         .attr("fill", i => fillPalette[i])
-        .attr("cx", xScale(xDomain[1]*0.9))
+        .attr("cx", guideX)
         .attr("cy", i => guideY(i))
         .attr("r", 7)
 
+    // Guide color text
     guide.append("g")
         .selectAll("text")
         .data(fillKeys)
         .join("text")
-        .attr("x", xScale(xDomain[1]*0.90 + 2000))
-        .attr("y", i => guideY(i) + 3.5)
+        .attr("x", guideX + guideColorTextXOffset)
+        .attr("y", i => guideY(i) + guideColorTextYOffset)
         .attr("font-size", fontSize)
         .text(i => i)
+
+    // guide size sizes
+    guide.append("g")
+        .selectAll("circle")
+        .data(guideSizeBreaks)
+        .join("circle")
+        .attr("cx", guideX)
+        .attr("cy", function(i) {
+            const y = guideY(fillKeys.at(-1)) + guideSizeYOffset - rScale(radius_from_area(i))
+            return y
+        })
+        .attr("r", i => rScale(radius_from_area(i)))
+        .attr("fill", "none")
+        .attr("stroke", "black")
+
 
 
     function mousemove(e) {
