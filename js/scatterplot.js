@@ -39,6 +39,7 @@ function Scatterplot(data, {
     strokeWidth = 2.5, // stroke width for dots
     guideSizeBreaks = [10000, 100000, 500000, 1000000],
     voronoiShow = false,
+    accentColor = "#F60000",
 } = {}) {
 
     function radius_from_area(A) {
@@ -110,6 +111,7 @@ function Scatterplot(data, {
         .style("position", "absolute")
         .style("font-size", `${fontSize}px`)
         .style("transition", "0.1s")
+        .style("border-color", accentColor)
 
     // generate SVG
     const svg = d3.create("svg")
@@ -309,7 +311,7 @@ function Scatterplot(data, {
 
         d3.select(`circle#${targetID}`)
             .attr("class", "selected")
-            .attr("stroke", "red")
+            .attr("stroke", accentColor)
             .attr("stroke-width", strokeWidth)
             .raise()
 
