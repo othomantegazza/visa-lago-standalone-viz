@@ -216,6 +216,10 @@ function Scatterplot(data, {
     function guideY(i) {
         return yScale(yDomain[1] * 0.9) + fillKeys.indexOf(i) * 30
     }
+    function sizeGuideCircleY(i, mult) {
+        const y = guideY(fillKeys.at(-1)) + guideSizeYOffset - rScale(radius_from_area(i)*mult)
+        return y
+    }
     console.log({ FILL, fillKeys })
     const guide = svg.append("g").attr("id", "legend")
     const guideX = xScale(xDomain[1] * 0.9)
@@ -249,10 +253,7 @@ function Scatterplot(data, {
         .data(guideSizeBreaks)
         .join("circle")
         .attr("cx", guideX)
-        .attr("cy", function(i) {
-            const y = guideY(fillKeys.at(-1)) + guideSizeYOffset - rScale(radius_from_area(i))
-            return y
-        })
+        .attr("cy", i => sizeGuideCircleY(i, 1))
         .attr("r", i => rScale(radius_from_area(i)))
         .attr("fill", "none")
         .attr("stroke", "black")
