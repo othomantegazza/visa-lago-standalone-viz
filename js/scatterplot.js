@@ -239,12 +239,13 @@ function Scatterplot(data, {
 
     // Guide color text
     guide.append("g")
+        .attr("font-size", fontSize*0.7)
         .selectAll("text")
         .data(fillKeys)
         .join("text")
         .attr("x", guideX + guideColorTextXOffset)
         .attr("y", i => guideY(i) + guideColorTextYOffset)
-        .attr("font-size", fontSize)
+        // .attr("font-size", fontSize)
         .text(i => i)
 
     // guide size sizes
@@ -258,6 +259,27 @@ function Scatterplot(data, {
         .attr("fill", "none")
         .attr("stroke", "black")
 
+    // guide size lines 
+    guide.append("g")
+        .selectAll("line")
+        .data(guideSizeBreaks)
+        .join("line")
+        .attr("x1", guideX )
+        .attr("x2", guideX + 20)
+        .attr("y1", i => sizeGuideCircleY(i, 2))
+        .attr("y2", i => sizeGuideCircleY(i, 2))
+        .attr("stroke", "black")
+        .attr("stroke-width", "0.5px")
+
+    // guide size text 
+    guide.append("g")
+        .attr("font-size", fontSize*0.7)
+        .selectAll("text")
+        .data(guideSizeBreaks)
+        .join("text")
+        .attr("x", guideX + 20)
+        .attr("y", i => sizeGuideCircleY(i, 2))
+        .text(i => i)
 
 
     function mousemove(e) {
