@@ -103,20 +103,6 @@ function Scatterplot(data, {
         .from(dataForVoronoi)
         .voronoi(voronoiRange);
 
-    console.log({FILL, fillPalette})
-    // console.log({ dataForVoronoi, voronoiShow, render: voronoi.render(), renderCell: voronoi.renderCell(1) })
-
-    // console.log({
-    //     x, y,
-    //     xRange, yRange,
-    //     X, Y, I,
-    //     xDomain, yDomain,
-    //     FILL, FITTED, fillPalette, ORDER,
-    //     America: fillPalette["Europe"],
-    //     voronoi,
-    //     ID, LABEL
-    // })
-
     // generate tooltip
     const tooltip = d3.select("body")
         .append("div")
@@ -264,7 +250,7 @@ function Scatterplot(data, {
         .attr("x", guideX - 19)
         .attr("y", guideY(fillKeys.at(-1)) + guideSizeYOffset - 50)
         .attr("font-size", fontSize)
-        .text("Request Lodged")
+        .text("Tot. Applications")
 
     // guide size sizes
     guide.append("g")
