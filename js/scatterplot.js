@@ -220,9 +220,8 @@ function Scatterplot(data, {
         const y = guideY(fillKeys.at(-1)) + guideSizeYOffset - rScale(radius_from_area(i)*mult)
         return y
     }
-    console.log({ FILL, fillKeys })
     const guide = svg.append("g").attr("id", "legend")
-    const guideX = xScale(xDomain[1] * 0.9)
+    const guideX = xScale(xDomain[1]) - 90
     const guideColorTextYOffset = 3.5
     const guideColorTextXOffset = 10
     const guideSizeYOffset = 90
