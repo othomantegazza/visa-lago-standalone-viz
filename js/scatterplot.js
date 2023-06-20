@@ -109,18 +109,18 @@ function Scatterplot(data, {
         .from(dataForVoronoi)
         .voronoi(voronoiRange);
 
-    console.log({ dataForVoronoi, voronoiShow, render: voronoi.render(), renderCell: voronoi.renderCell(1) })
+    // console.log({ dataForVoronoi, voronoiShow, render: voronoi.render(), renderCell: voronoi.renderCell(1) })
 
-    console.log({
-        x, y,
-        xRange, yRange,
-        X, Y, I,
-        xDomain, yDomain,
-        FILL, FITTED, fillPalette, ORDER,
-        America: fillPalette["Europe"],
-        voronoi,
-        ID, LABEL
-    })
+    // console.log({
+    //     x, y,
+    //     xRange, yRange,
+    //     X, Y, I,
+    //     xDomain, yDomain,
+    //     FILL, FITTED, fillPalette, ORDER,
+    //     America: fillPalette["Europe"],
+    //     voronoi,
+    //     ID, LABEL
+    // })
 
     // generate tooltip
     const tooltip = d3.select("body")
@@ -236,14 +236,12 @@ function Scatterplot(data, {
         var circleX = selectedCircle.x + selectedCircle.width + scrollX + 5
         var circleY = selectedCircle.y + scrollY - 25
         
-        console.log({ e, targetID, labelID, selectedCircle, circleX, circleY})
+        // console.log({ e, targetID, labelID, selectedCircle, circleX, circleY})
         
         // d3.select(e.target).attr("fill", "yellow")
 
         d3.select('div#scatter-tooltip')
             .style("visibility", "visible")
-            // .style("top", `${e.pageY - tooltipOffset * 2}px`)
-            // .style("left", `${e.pageX + tooltipOffset}px`)
             .style("top", `${circleY}px`)
             .style("left", `${circleX}px`)
             .html(`<div>${labelID}</div>`)
@@ -256,16 +254,16 @@ function Scatterplot(data, {
 
     }
 
-    function mouseout(e) {
-
-        const targetID = e.target.id
-
-        d3.select('div#scatter-tooltip')
-            .style("visibility", "hidden")
-
-        d3.select(`circle#${targetID}`)
-            .attr("stroke", "none")
-    }
+    // function mouseout(e) {
+// 
+    //     const targetID = e.target.id
+// 
+    //     d3.select('div#scatter-tooltip')
+    //         .style("visibility", "hidden")
+// 
+    //     d3.select(`circle#${targetID}`)
+    //         .attr("stroke", "none")
+    // }
     //            .attr("class", "svg-tooltip")
     //            .attr("id", "tooltip-scatter")
     //            .style("visibility", "hidden")
