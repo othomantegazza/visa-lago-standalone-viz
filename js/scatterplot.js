@@ -20,11 +20,11 @@ function Scatterplot(data, {
     insetLeft = inset, // inset the default x-range
     width = 640, // outer width, in pixels
     height = 400, // outer height, in pixels
-    minWidth = 450,
+    minWidth = 0,
     maxWidth = 1000,
     xType = d3.scaleLinear, // type of x-scale
     xDomain, // [xmin, xmax]
-    xLabel = "GDP per capita from the previous year, in equivalent US dollars [$] →", // a label for the x-axis
+    xLabel = "GDP per Capita on Previous Year [$] →", // a label for the x-axis
     xFormat, // a format specifier string for the x-axis
     yType = d3.scaleLinear, // type of y-scale
     yDomain, // [ymin, ymax]
