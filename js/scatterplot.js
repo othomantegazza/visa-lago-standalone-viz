@@ -206,7 +206,7 @@ function Scatterplot(data, {
         return yScale(yDomain[1] * 0.9) + fillKeys.indexOf(i) * 30
     }
     function sizeGuideCircleY(i, mult) {
-        const y = guideY(fillKeys.at(-1)) + guideSizeYOffset - rScale(radius_from_area(i)*mult)
+        const y = guideY(fillKeys[fillKeys.length - 1]) + guideSizeYOffset - rScale(radius_from_area(i)*mult)
         return y
     }
     const guide = svg.append("g").attr("id", "legend")
@@ -222,7 +222,7 @@ function Scatterplot(data, {
         .append("text")
         .attr("id", "guidetitle")
         .attr("x", guideX - 19)
-        .attr("y", guideY(fillKeys.at(0)) - 20)
+        .attr("y", guideY(fillKeys[0]) - 20)
         .attr("font-size", fontSize)
         .text("Continent")
 
@@ -251,7 +251,7 @@ function Scatterplot(data, {
         .append("text")
         .attr("id", "guidetitle")
         .attr("x", guideX - 19)
-        .attr("y", guideY(fillKeys.at(-1)) + guideSizeYOffset - 50)
+        .attr("y", guideY(fillKeys[fillKeys.length - 1]) + guideSizeYOffset - 50)
         .attr("font-size", fontSize)
         .text("Tot. Applications")
 
