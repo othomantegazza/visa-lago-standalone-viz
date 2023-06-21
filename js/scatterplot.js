@@ -210,7 +210,7 @@ function Scatterplot(data, {
         return y
     }
     const guide = svg.append("g").attr("id", "legend")
-    const guideX = xScale(xDomain[1]) - 90
+    const guideX = xScale(xDomain[1]) - 65
     const guideColorTextYOffset = 3.5
     const guideColorTextXOffset = 10
     const guideSizeYOffset = 90
@@ -253,7 +253,7 @@ function Scatterplot(data, {
         .attr("x", guideX - 19)
         .attr("y", guideY(fillKeys[fillKeys.length - 1]) + guideSizeYOffset - 50)
         .attr("font-size", fontSize)
-        .text("Tot. Applications")
+        .text("Applications")
 
     // guide size sizes
     guide.append("g")
