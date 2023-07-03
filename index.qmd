@@ -1,5 +1,5 @@
 ---
-output: html_document
+title: "Visa Rejection"
 editor_options: 
   chunk_output_type: console
 execute: 
@@ -12,9 +12,9 @@ execute:
 ```{r}
 #| include: false
 oldwd <- getwd()
-setwd('~/Desktop/visa-lago/')
+#setwd('~/Desktop/visa-lago/')
 source(knitr::purl('explore.qmd'))
-setwd(oldwd)
+#setwd(oldwd)
 ```
 
 ```{r}

@@ -9,9 +9,13 @@ project:
 
 format:
   html:
+    toc: true
+    toc-location: left
     echo: false
     theme: style/style.scss
-    page-layout: custom 
+    grid: 
+      body-width: 1000px
+    # page-layout: custom 
     margin-left: 20px
     margin-top: 10px 
     margin-right: 30px

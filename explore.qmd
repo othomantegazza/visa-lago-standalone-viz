@@ -1,0 +1,547 @@
+---
+title: "Visa Approval Rate"
+author: "Otho Mantegazza"
+date: today
+format:
+  html:
+    toc: true
+    # code-fold: true
+    df-print: paged
+execute: 
+  warning: false
+  echo: false
+  error: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| message: false
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(quantreg)
+library(countrycode)
+library(ggiraph)
+library(broom)
+library(glue)
+library(ggrepel)
+
+theme_set(
+  theme_minimal()
+)
+
+css_default_hover <-
+  girafe_css_bicolor(primary = "yellow",
+                     secondary = "red")
+
+cb_palette <- 
+  c(Africa = '#228833',
+    Americas = '#CCBB44',
+    Asia = '#4477AA',
+    Europe = '#EE6677',
+    Oceania = '#AA3377')
+
+highlight_countries <- c(
+  'PAK'
+  )
+```
+
+# Data
+
+This analysis contains data from multiple sources:
+
+1. World Bank GDP per capita, in current international dollars, downloaded manually from the [World Bank's website](https://datacatalog.worldbank.org/search/dataset/0037712/World-Development-Indicators).
+
+    Indicator name: `GDP per capita, PPP (current international $)`.
+
+```{r}
+# Load development indicators ---------------------------------------------
+
+dev_i <-
+  read_csv('data/WDIData.csv') %>% 
+  clean_names() 
+  
+# Extract GDP and clean country names -------------------------------------
+
+gdp_c <- 
+  dev_i %>% 
+  filter(
+    indicator_name == 'GDP per capita, PPP (current international $)'
+  ) %>% 
+  select(
+    country_name,
+    country_code,
+    indicator_name, 
+    indicator_code, 
+    GDP_per_capita_eq_2019 = x2019,
+    GDP_per_capita_eq_2021 = x2021,
+  ) %>% 
+  pivot_longer(c(GDP_per_capita_eq_2019,GDP_per_capita_eq_2021),
+               names_to = 'year',
+               values_to = 'gdp_per_capita') %>% 
+  mutate(year = year %>%
+           str_remove('GDP_per_capita_eq_') %>%
+           as.numeric())
+```
+
+2. Schengen short-stay visa statistics, downloaded manually from the [European Commission's Website](https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/visa-policy_en#paragraph_1903).
+
+    "A short-stay visa issued by one of the Schengen States entitles its holder to travel throughout the 27 Schengen States for up to 90 days in any 180-day period. Visas for visits exceeding that period remain subject to national procedures."
+    
+    The EU maintains a [list of country (PDF)](https://home-affairs.ec.europa.eu/system/files/2022-05/list%20of%20countries%20whose%20citizens%20must%20have%20a%20visa%20when%20crossing%20the%20external%20borders%20and%20those%20whose%20nationals%20are%20exempt%20from%20that%20requirement_en.pdf) that require visa to enter the Schengen area
+
+
+```{r}
+# Load visa stats ---------------------------------------------------------
+
+read_and_clean_visa_stats <- function(path) {
+  visa <-
+    read_excel(path, 
+               sheet = 2) %>% 
+    clean_names() %>%  
+    select(
+      schengen_state,
+      consulate_country = country_where_consulate_is_located,
+      consulate_city = consulate,
+      issued = total_at_vs_and_uniform_visas_issued_including_multiple_at_vs_me_vs_and_lt_vs,
+      not_issued = total_at_vs_and_uniform_visas_not_issued
+    ) %>% 
+    drop_na(schengen_state) %>%
+    mutate(
+      across(
+        .cols = c('schengen_state', 'consulate_country'),
+        .fns = ~str_to_upper(.)
+      )
+    ) %>% 
+    mutate(
+      consulate_country = consulate_country %>% 
+        recode('TÜRKIYE' = 'TURKEY')
+    ) %>% 
+    mutate(
+      across(
+        .cols = c('schengen_state', 'consulate_country'),
+        .fns = ~countrycode(.,
+                           origin = 'country.name',
+                           destination = 'iso3c'),
+        .names = '{.col}_code'
+      )
+    )
+  
+  return(visa)
+}
+
+visa_2022 <- 
+  read_and_clean_visa_stats(
+    'data/Visa statistics for consulates in 2022_en.xlsx'
+  )
+
+visa_2019 <- 
+  read_and_clean_visa_stats(
+    'data/2019-consulates-schengen-visa-stats.xlsx'
+  )
+```
+
+```{r}
+exempt <-
+  read_csv('data/short-stay-visa-exempt.csv') %>% 
+  mutate(country_code = country_name %>% 
+           countrycode(
+             origin = 'country.name',
+             destination = 'iso3c'
+           )
+  )
+
+schengen_states <- 
+  visa_2022 %>% 
+  select(schengen_state,
+         schengen_state_code) %>% 
+  distinct() %>% 
+  rename(country_name = schengen_state,
+         country_code = schengen_state_code)
+
+eu_27 <- 
+  read_csv('data/eu-eurostat-codes.csv') %>% 
+  mutate(country_code = country %>% 
+           countrycode(
+             origin = 'country.name',
+             destination = 'iso3c'
+           )
+  ) %>% 
+  select(
+    country_name = country,
+    country_code
+  )
+
+exempt_full <- 
+  bind_rows(
+    exempt,
+    schengen_states,
+    eu_27
+  ) %>% 
+  distinct(country_code) %>% 
+  mutate(country_name = country_code %>% 
+           countrycode(
+             origin = 'iso3c',
+             destination = 'country.name'
+           )) %>% 
+  arrange(country_name)
+```
+
+
+# Hypothesis
+
+People from lower income countries face higher rejection rate when applying for a Schengen Visa.
+
+Broad question: are we missing chances and possibilities, when we restrict travelling? Expecially when we restrict it inequally.
+
+# Assumption
+
+Visa request originating from one country, come from people with an income and purchasing power represented by that country's (Worldk Bank Indicators) statistics.
+
+# Results
+
+## All States
+
+```{r}
+model_country_level <- function(visa_stats, 
+                                gdp_c) {
+  
+  country_level <- 
+    visa_stats %>% 
+    group_by(consulate_country, consulate_country_code) %>% 
+    summarise(
+      across(
+        .cols = c('issued', 'not_issued'),
+        .fns = ~sum(., na.rm = T)
+      )
+    ) %>% 
+    ungroup() %>% 
+    mutate(tot_request = issued + not_issued,
+           ratio_rejected = not_issued/(tot_request)) %>% 
+    left_join(gdp_c,
+              by = c('consulate_country_code' = 'country_code')) 
+  
+  visa_binomial <- 
+    country_level %>% 
+    select(
+      consulate_country,
+      consulate_country_code,
+      gdp_per_capita,
+      issued,
+      not_issued,
+    ) %>% 
+    drop_na(gdp_per_capita) %>% 
+    group_by(consulate_country, gdp_per_capita) %>% 
+    pivot_longer(cols = c(issued, not_issued),
+                 names_to = 'outcome') %>% 
+    ungroup() %>% 
+    mutate(outcome_num = case_when(outcome == 'not_issued' ~ 1,
+                                   outcome == 'issued' ~ 0))
+  
+  fit <- 
+    glm(
+      formula = outcome_num ~ gdp_per_capita,
+      data = visa_binomial,
+      weights = value, 
+      family = 'binomial'
+    )
+  
+  country_level <- 
+    augment(
+      fit,
+      newdata = country_level,
+      type.predict = "response"
+    ) %>% 
+    mutate(
+      consulate_country_continent = 
+        consulate_country_code %>% 
+        countrycode(origin = 'iso3c',
+                    destination = 'continent')
+    )
+  
+  return(country_level)
+}
+
+country_level_2022 <-
+  model_country_level(
+    visa_2022,
+    gdp_c %>% filter(year == 2021))
+
+country_level_2019 <-
+  model_country_level(
+    visa_2019,
+    gdp_c %>% filter(year == 2019))
+
+max_request <- 
+  c(country_level_2019$tot_request,
+    country_level_2022$tot_request) %>% 
+  max(na.rm = T)
+
+max_rejections <- 
+  c(country_level_2019$ratio_rejected,
+    country_level_2022$ratio_rejected) %>% 
+  max(na.rm = T)
+
+max_gdp_pc <- 
+  gdp_c$gdp_per_capita %>% 
+  max(na.rm = T)
+```
+
+```{r}
+plot_model <- function(modelled_data,
+                       year,
+                       gdp_year,
+                       title =  glue("Schengen Visa Rejection Rate in {year}"),
+                       model = TRUE,
+                       width = 200,
+                       ratio = 4/3) {
+  country_level_scatter <- 
+    modelled_data %>% 
+    # drop_na(GDP_per_capita_eq_2021, ratio_rejected) %>% 
+    ggplot() +
+    aes(x = gdp_per_capita,
+        colour = consulate_country_continent,
+                        y = ratio_rejected) +
+    {if(model)geom_line(aes(y = .fitted),
+                        colour = 'grey30',
+                        lty = '31',
+                        size = 0.8)} +
+    geom_hline(yintercept = 0) +
+    geom_vline(xintercept = 0) +
+    geom_point_interactive(aes(size = tot_request,
+                               tooltip = consulate_country,
+                               data_id = consulate_country_code),
+                           alpha = .9,
+                           hover_nearest = TRUE) +
+    labs(x = glue('GDP per Capita from previous year in equivalent dollars ($)'),
+         y = 'Percent of Applications Rejected',
+         size = 'Applications Received',
+         colour = 'Continent',
+         title = title,
+         subtitle = "(By country in which the visa application was lodged)") +
+    scale_size_continuous(range = c(0, 15),
+                          breaks = c(1e3, 1e4, 1e5, 1e6),
+                          limits = c(0, max_request)) +
+    scale_y_continuous(labels = scales::percent,
+                       limits = c(0, max_rejections)) +
+    scale_x_continuous(limits = c(0, max_gdp_pc)) + 
+    scale_colour_manual(values = cb_palette)
+  
+  
+  ggsave(filename = glue('output/{title}-labels-PAKISTAN-WIDE.jpg'), 
+         plot = country_level_scatter +
+           geom_text_repel(
+             data = . %>% filter(
+               consulate_country_code %in% highlight_countries
+             ),
+             mapping = aes(label = consulate_country),
+             colour = 'black',
+             min.segment.length = 0, 
+             # nudge_x = 2e4,
+             # nudge_y = .1, 
+             xlim = c(3e4, NA),
+             ylim = c(0.25, NA),
+             size = 3,
+             direction = 'y',
+             force = .1, 
+             segment.size = 0.2,
+           ),
+           # theme(legend.position = "bottom",
+           #       legend.box="vertical"),
+         width = width,
+         height = width/ratio,
+         units = 'mm') 
+  
+  ggsave(filename = glue('output/{title}-WIDE.jpg'),
+         plot = country_level_scatter,
+           # theme(legend.position = "bottom",
+           #       legend.box="vertical"),
+         width = width,
+         height = width/ratio,
+         units = 'mm')
+  
+  x <- girafe(ggobj = country_level_scatter
+                # theme(legend.position = "bottom"
+                #  legend.box="vertical")
+              )
+  x <- girafe_options(x, opts_hover(css = "stroke:red;stroke-width:3px"))
+
+  
+  return(x)
+}
+```
+
+
+```{r}
+#| column: screen-inset-right
+#| fig-width: 8
+plot_model(country_level_2022, year = 2022, gdp_year = 2021)
+
+```
+
+
+```{r}
+#| column: screen-inset-right
+#| fig-width: 10
+plot_model(country_level_2019, 2019, gdp_year = 2019)
+```
+
+## Removing Exempt Countries
+
+In 2022, passport holders of `r nrow(exempt)` countries are exempt from Schengen short-stay visa when crossing the borders. These countries are [documented here (PDF)](https://home-affairs.ec.europa.eu/system/files/2022-05/list%20of%20countries%20whose%20citizens%20must%20have%20a%20visa%20when%20crossing%20the%20external%20borders%20and%20those%20whose%20nationals%20are%20exempt%20from%20that%20requirement_en.pdf). Obviously, also `r nrow(exempt_full) - nrow(exempt)` Schengen and EU States are exempt.
+
+Visa request from those countries probably comes from migrant population.
+
+::: {.callout-caution}
+I'm not sure how to deal with Cyprus, Romania and Bulgaria, which are in a strange situation regarding Schengen and EU.
+:::
+
+```{r}
+#| tbl-cap: "Exempt countries:"
+exempt_full
+```
+
+```{r}
+country_level_2022_not_exempt <-
+  model_country_level(
+    visa_2022 %>% filter( ! consulate_country_code %in% exempt_full$country_code),
+    gdp_c %>% filter(year == 2021))
+```
+
+
+```{r}
+#| column: screen-inset-right
+#| fig-width: 10
+plot_model(country_level_2022_not_exempt,
+           year = 2022,
+           gdp_year = 2021,
+           title = "Schengen Visa Rejection Rate in 2022 - Not Exempt States")
+```
+
+```{r}
+country_level_2022_exempt <-
+  model_country_level(
+    visa_2022 %>% filter(consulate_country_code %in% exempt_full$country_code),
+    gdp_c %>% filter(year == 2021))
+```
+
+
+```{r}
+#| column: screen-inset-right
+#| fig-width: 10
+plot_model(country_level_2022_exempt,
+           year = 2022,
+           gdp_year = 2021,
+           title = "Schengen Visa Rejection Rate in 2022 - Exempt States",
+           model = FALSE)
+```
+
+```{r}
+#| eval: false
+# Plot binomial stratified by country -------------------------------------
+
+# visa_by_gdp_consulate_schstate <-  
+#   visa %>% 
+#   group_by(schengen_state, consulate_country) %>% 
+#   summarise(
+#     across(
+#       .cols = c('issued', 'not_issued'),
+#       .fns = ~sum(., na.rm = T)
+#     )
+#   ) %>% 
+#   ungroup() %>% 
+#   mutate(tot_request = issued + not_issued,
+#          ratio_rejected = not_issued/(tot_request)) %>% 
+#   left_join(gdp_c,
+#             by = c('consulate_country' = 'country_name'),
+#             keep = T) %>% 
+#   # mutate(consulate_country = consulate_country %>%
+#   #          factor(levels = countries_by_gdp_c)) %>% 
+#   select(schengen_state,
+#          consulate_country,
+#          GDP_per_capita_eq_2021,
+#          issued,
+#          not_issued,
+#          tot_request,
+#          ratio_rejected) %>% 
+#   drop_na(consulate_country)
+# 
+# visa_for_by_consulate_binomial <- 
+#   visa_by_gdp_consulate_schstate %>% 
+#   select(
+#     schengen_state,
+#     consulate_country,
+#     GDP_per_capita_eq_2021,
+#     issued,
+#     not_issued,
+#   ) %>% 
+#   group_by(schengen_state, consulate_country, GDP_per_capita_eq_2021) %>% 
+#   pivot_longer(cols = c(issued, not_issued),
+#                names_to = 'outcome') %>% 
+#   ungroup() %>% 
+#   mutate(outcome_num = case_when(outcome == 'not_issued' ~ 1,
+#                                  outcome == 'issued' ~ 0))
+# 
+# 
+# visa_by_gdp_consulate_schstate %>% 
+#   ggplot() +
+#   aes(x = GDP_per_capita_eq_2021) +
+#   geom_point(aes(size = tot_request,
+#                  y = ratio_rejected),
+#              alpha = .7) +
+#   geom_smooth(data = visa_for_by_consulate_binomial,
+#               aes(weight = value,
+#                   y = outcome_num),
+#               method = 'glm',
+#               method.args = list(family = "binomial"),
+#               colour = '#8800FF') +
+#   geom_hline(yintercept = 0) +
+#   geom_vline(xintercept = 0) +
+#   facet_wrap(facets = "schengen_state") +
+#   labs(x = 'GDP per Capita in 2021 Equivalent Dollars',
+#        y = 'Percent of Application Rejected',
+#        size = 'Applications received',
+#        title = "Schengen Visa Rejection Rate",
+#        subtitle = "(by country in which the visa application was lodged)") +
+#   lims(y = c(0, NA)) +
+#   scale_size_continuous(range = c(0, 5),
+#                         breaks = c(1e3, 1e4, 1e5)) +
+#   scale_y_continuous(labels = scales::percent)
+# 
+# # extra ???? --------------------------------------------------------------
+# 
+# countries_by_gdp_c <- 
+#   gdp_c %>% 
+#   filter(country_name %in% visa$consulate_country) %>% 
+#   arrange(GDP_per_capita_eq_2021) %>% 
+#   drop_na() %>% 
+#   pull(country_name)
+# 
+# 
+# visa_gdp_consulate <- 
+#   visa_by_gdp %>% 
+#   mutate(consulate_country = consulate_country %>% factor(levels = countries_by_gdp_c)) %>% 
+#   select(consulate_country, tot_request, ratio_rejected) %>% 
+#   drop_na(consulate_country)
+# 
+
+# visa_gdp_consulate %>% 
+#   ggplot() +
+#   aes(x = ratio_rejected,
+#       y = consulate_country,
+#       fill = tot_request) +
+#   geom_col()
+
+# geom_point(aes(size = tot_request),
+#            alpha = .7) +
+# geom_smooth(aes(weight = tot_request),
+#             method = 'lm',
+#             formula = 'y ~ poly(x, 3)', 
+#             se = FALSE) +
+# stat_boxplot(aes(group = cut_interval(GDP_per_capita_eq_2021, 10),
+#                  weight = tot_request),
+#              # geom = 'point',
+#              fill = '#00000044',
+#              outlier.alpha = 0) +
+```
