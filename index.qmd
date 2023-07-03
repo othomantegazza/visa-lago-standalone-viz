@@ -1,5 +1,5 @@
 ---
-title: "Visa Rejection"
+title: "Short Term Visa Accessibility"
 editor_options: 
   chunk_output_type: console
 execute: 
@@ -98,3 +98,111 @@ African countries are often outliers, with rejection rates well above what is ex
 :::
 
 ::::
+
+## UK Visitor Visa Rejection Rate by Nationality
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(countrycode)
+library(grid)
+
+theme_set(theme_minimal(base_size = 16))
+
+cb_palette <- 
+  c(Africa = '#339944',
+    Americas = '#DDCC55',
+    Asia = '#5588BB',
+    Europe = '#EE6677',
+    Oceania = '#AA3377')
+```
+
+```{r}
+visa_uk <- 
+  read_tsv('data/UK-visas-summary-mar-2023-tables.tsv')
+
+visa_uk <- 
+  visa_uk %>% 
+  mutate(grant_rate = grant_rate %>% str_remove('%') %>% as.numeric()) %>% 
+  mutate(grant_rate = grant_rate/100,
+         rej_rate = 1-grant_rate) %>% 
+  mutate(continent = countrycode(nationality,
+                             origin = 'country.name',
+                             destination = 'continent'))
+```
+
+```{r}
+#| fig-width: 10
+#| fig-height: 9
+p <-
+  visa_uk %>% 
+  arrange(desc(rej_rate)) %>% 
+  mutate(nationality = nationality %>% as_factor()) %>% 
+  ggplot() +
+  aes(y = nationality,
+      x = rej_rate) +
+  geom_segment(aes(yend = after_stat(y),
+                   xend = 0),
+               linewidth = .5,
+               lty = '11') +
+  geom_point(aes(size = resolved,
+                 fill = continent),
+             alpha = 1,
+             pch = 21) +
+  geom_vline(xintercept = 0,
+             linewidth = 1.5) +
+  labs(x = "Visa Rejection Rate",
+       y = "Nationality",
+       size = "Size:\nApplications Received",
+       fill = "Colour:\nContinent",
+       title = "UK Visitor Visa Rejection Rate by Nationality",
+       subtitle = "Year Ending March 2023") +
+  guides(fill = guide_legend(override.aes = list(size = 5)),
+         size = guide_legend(override.aes = list(shape = 21,
+                                                 fill = "white"))) +
+  scale_x_continuous(limits = c(0, 1.05),
+                     labels = scales::percent,
+                     expand = expansion(0, 0),
+                     breaks = c(0, .2, .4, .6, .8, 1)) +
+  scale_size_continuous(range = c(0, 15),
+                        labels = scales::comma) +
+  scale_fill_manual(values = cb_palette) +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_line(colour = 'black',
+                                          size = .1),
+        # axis.title = element_text(hjust = 1),
+        legend.justification = "top")
+
+# ggsave(plot = p,
+#        filename = 'output/uk-visa.jpg',
+#        width = 10, height = 10)
+
+p <- ggplotGrob(p)
+
+# png(filename = 'output/uk-visa-2023-q1.png',
+#     width = 25,
+#     height = 25,
+#     units = "cm",
+#     res = 300)
+grid.newpage()
+grid.draw(p)
+grid.text(x = 0.76,
+          y = 0.4,
+          gp = gpar(fontsize = 12),
+          label = str_wrap(
+            "Visitor visa applications and outcomes, by nationality, in the year ending March 2023. Top 20 nationalities applying for visitor visas in the year. Data relates to entry clearance visa applications made outside the UK. Includes main applicants and dependants.",
+            width = 28),
+          hjust = 0,
+          vjust = 1)
+grid.text(x = 0.76,
+          y = 0.10,
+          gp = gpar(fontsize = 8),
+          label = str_wrap(
+            "Data from www.gov.uk",
+            width = 28),
+          hjust = 0,
+          vjust = 1)
+# dev.off()
+```
+
