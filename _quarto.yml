@@ -14,8 +14,11 @@ format:
     number-sections: true
     echo: false
     theme: style/style.scss
-    grid: 
-      body-width: 1000px
+    grid:
+      sidebar-width: 200px
+      body-width: 900px
+      margin-width: 200px
+      gutter-width: 0rem
     # page-layout: custom 
     margin-left: 20px
     margin-top: 10px 
