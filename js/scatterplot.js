@@ -1,5 +1,5 @@
-// Copyright 2021 Observable, Inc.
-// Released under the ISC license.
+// Modified from
+// Released under ISC Licenes
 // https://observablehq.com/@d3/scatterplot
 function Scatterplot(data, {
     x = ([x]) => x, // given d in data, returns the (quantitative) x-value
