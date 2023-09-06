@@ -15,6 +15,17 @@ oldwd <- getwd()
 #setwd('~/Desktop/visa-lago/')
 source(knitr::purl('explore.qmd'))
 #setwd(oldwd)
+country_level_2022 %>% 
+  select(
+    consulate_country,
+    consulate_country_code,
+    consulate_country_continent,
+    tot_request,
+    gdp_per_capita,
+    ratio_rejected,
+    fitted = .fitted
+  ) %>% 
+  write_csv('data/2022-country-level-clean.csv')
 ```
 
 ```{r}
