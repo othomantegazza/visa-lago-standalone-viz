@@ -64,11 +64,33 @@ dev_i <-
   
 # Extract GDP and clean country names -------------------------------------
 
+gni_c <- 
+  dev_i %>% 
+  filter(
+    # indicator_name == 'GDP per capita, PPP (current international $)'
+    indicator_name == "GNI per capita (constant 2015 US$)"
+  ) %>% # count(indicator_name) %>% view()
+  select(
+    country_name,
+    country_code,
+    indicator_name, 
+    indicator_code, 
+    GDP_per_capita_eq_2019 = x2019,
+    GDP_per_capita_eq_2021 = x2021,
+  ) %>% 
+  pivot_longer(c(GDP_per_capita_eq_2019,GDP_per_capita_eq_2021),
+               names_to = 'year',
+               values_to = 'gdp_per_capita') %>% 
+  mutate(year = year %>%
+           str_remove('GDP_per_capita_eq_') %>%
+           as.numeric())
+
 gdp_c <- 
   dev_i %>% 
   filter(
     indicator_name == 'GDP per capita, PPP (current international $)'
-  ) %>% 
+    # indicator_name == "GNI per capita (constant 2015 US$)"
+  ) %>% # count(indicator_name) %>% view()
   select(
     country_name,
     country_code,
