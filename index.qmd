@@ -117,6 +117,7 @@ library(tidyverse)
 library(janitor)
 library(countrycode)
 library(grid)
+library(readODS)
 
 theme_set(theme_minimal(base_size = 16))
 
@@ -127,6 +128,7 @@ cb_palette <-
     Europe = '#EE6677',
     Oceania = '#AA3377')
 ```
+
 
 ```{r}
 visa_uk <- 
@@ -215,5 +217,63 @@ grid.text(x = 0.76,
           hjust = 0,
           vjust = 1)
 # dev.off()
+```
+
+# experiments
+
+```{r}
+#| eval: false
+library(readODS)
+read_ods("data/visas-summary-dec-2023-tables.ods", 
+         sheet = "Vis_06",
+         skip = 1)
+  
+```
+
+```{r}
+#| eval: false
+country_level_2022 %>% 
+  select(-indicator_name, -indicator_code, -year) %>% 
+  mutate(
+    un_subregion_name = countryname(
+      sourcevar = country_name,
+      destination = "un.regionsub.name"
+      )
+  ) %>% 
+  mutate(
+    un_subregion_name = un_subregion_name %>% 
+      {
+        case_when(
+          . %in% c(
+            "Sub-Saharan Africa",
+            "Latin America and the Caribbean"
+          ) ~ countryname(
+            sourcevar = country_name,
+            destination = "un.regionintermediate.name"
+          ),
+          TRUE ~ .
+        )
+      }
+  ) %>% # write_csv("data/export-for-fede.csv") # count(un_subregion_name)
+  filter( 
+    ! un_subregion_name %in% c(
+      "Western Europe", "Southern Europe", "Northern Europe"
+    )
+  ) %>% 
+  ggplot() +
+  aes(x = ratio_rejected,
+      y = reorder(un_subregion_name, ratio_rejected, FUN=median)) +
+  geom_boxplot(
+    outlier.alpha = 0
+  ) +
+  geom_jitter(
+    aes(colour = log(gdp_per_capita)),
+    width = 0, 
+    height = .1,
+    size = 3
+    ) +
+  stat_summary(
+    fun = mean, geom = "text", label = "I", colour = "red", size = 10) +
+  scale_colour_viridis_c()
 ```
 
