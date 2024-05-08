@@ -129,91 +129,112 @@ cb_palette <-
 ```
 
 ```{r}
-visa_uk <- 
+visa_uk_mar <- 
   read_tsv('data/UK-visas-summary-mar-2023-tables.tsv')
 
-visa_uk <- 
+visa_uk_dec <- 
+  read_tsv('data/UK-visas-summary-dec-2023-tables.tsv')
+```
+
+```{r}
+plot_uk_visa <- function(visa_uk, year_ending = "March 2023") 
+{
+
+ visa_uk <- 
   visa_uk %>% 
   mutate(grant_rate = grant_rate %>% str_remove('%') %>% as.numeric()) %>% 
   mutate(grant_rate = grant_rate/100,
          rej_rate = 1-grant_rate) %>% 
   mutate(continent = countrycode(nationality,
-                             origin = 'country.name',
-                             destination = 'continent'))
+                                 origin = 'country.name',
+                                 destination = 'continent'))
+
+  p <-
+    visa_uk %>% 
+    arrange(desc(rej_rate)) %>% 
+    mutate(nationality = nationality %>% as_factor()) %>% 
+    ggplot() +
+    aes(y = nationality,
+        x = rej_rate) +
+    geom_segment(aes(yend = after_stat(y),
+                     xend = 0),
+                 linewidth = .5,
+                 lty = '11') +
+    geom_point(aes(size = resolved,
+                   fill = continent),
+               alpha = 1,
+               pch = 21) +
+    geom_vline(xintercept = 0,
+               linewidth = 1.5) +
+    labs(x = "Visa Rejection Rate",
+         y = "Nationality",
+         size = "Size:\nApplications Received",
+         fill = "Colour:\nContinent",
+         title = "UK Visitor Visa Rejection Rate by Nationality",
+         subtitle = glue::glue("Year Ending {year_ending}")) +
+    guides(fill = guide_legend(override.aes = list(size = 5)),
+           size = guide_legend(override.aes = list(shape = 21,
+                                                   fill = "white"))) +
+    scale_x_continuous(limits = c(0, 1.05),
+                       labels = scales::percent,
+                       expand = expansion(0, 0),
+                       breaks = c(0, .2, .4, .6, .8, 1)) +
+    scale_size_continuous(range = c(0, 15),
+                          labels = scales::comma) +
+    scale_fill_manual(values = cb_palette) +
+    theme(panel.grid.major.y = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.grid.major.x = element_line(colour = 'black',
+                                            size = .1),
+          # axis.title = element_text(hjust = 1),
+          legend.justification = "top")
+  
+  # ggsave(plot = p,
+  #        filename = 'output/uk-visa.jpg',
+  #        width = 10, height = 10)
+  
+  p <- ggplotGrob(p)
+  
+  # png(filename = 'output/uk-visa-2023-q1.png',
+  #     width = 25,
+  #     height = 25,
+  #     units = "cm",
+  #     res = 300)
+  grid.newpage()
+  grid.draw(p)
+  grid.text(x = 0.76,
+            y = 0.4,
+            gp = gpar(fontsize = 12),
+            label = str_wrap(
+              glue::glue("Visitor visa applications and outcomes, by nationality, in the year ending {year_ending}. Top 20 nationalities applying for visitor visas in the year. Data relates to entry clearance visa applications made outside the UK. Includes main applicants and dependants."),
+              width = 28),
+            hjust = 0,
+            vjust = 1)
+  grid.text(x = 0.76,
+            y = 0.10,
+            gp = gpar(fontsize = 8),
+            label = str_wrap(
+              "Data from www.gov.uk",
+              width = 28),
+            hjust = 0,
+            vjust = 1)
+  # dev.off()
+}
 ```
+
+### Year Ending March 2023
 
 ```{r}
 #| fig-width: 10
 #| fig-height: 9
-p <-
-  visa_uk %>% 
-  arrange(desc(rej_rate)) %>% 
-  mutate(nationality = nationality %>% as_factor()) %>% 
-  ggplot() +
-  aes(y = nationality,
-      x = rej_rate) +
-  geom_segment(aes(yend = after_stat(y),
-                   xend = 0),
-               linewidth = .5,
-               lty = '11') +
-  geom_point(aes(size = resolved,
-                 fill = continent),
-             alpha = 1,
-             pch = 21) +
-  geom_vline(xintercept = 0,
-             linewidth = 1.5) +
-  labs(x = "Visa Rejection Rate",
-       y = "Nationality",
-       size = "Size:\nApplications Received",
-       fill = "Colour:\nContinent",
-       title = "UK Visitor Visa Rejection Rate by Nationality",
-       subtitle = "Year Ending March 2023") +
-  guides(fill = guide_legend(override.aes = list(size = 5)),
-         size = guide_legend(override.aes = list(shape = 21,
-                                                 fill = "white"))) +
-  scale_x_continuous(limits = c(0, 1.05),
-                     labels = scales::percent,
-                     expand = expansion(0, 0),
-                     breaks = c(0, .2, .4, .6, .8, 1)) +
-  scale_size_continuous(range = c(0, 15),
-                        labels = scales::comma) +
-  scale_fill_manual(values = cb_palette) +
-  theme(panel.grid.major.y = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.grid.major.x = element_line(colour = 'black',
-                                          size = .1),
-        # axis.title = element_text(hjust = 1),
-        legend.justification = "top")
+plot_uk_visa(visa_uk_mar, year_ending = "March 2023")
+```
 
-# ggsave(plot = p,
-#        filename = 'output/uk-visa.jpg',
-#        width = 10, height = 10)
+### Year Ending December 2023
 
-p <- ggplotGrob(p)
-
-# png(filename = 'output/uk-visa-2023-q1.png',
-#     width = 25,
-#     height = 25,
-#     units = "cm",
-#     res = 300)
-grid.newpage()
-grid.draw(p)
-grid.text(x = 0.76,
-          y = 0.4,
-          gp = gpar(fontsize = 12),
-          label = str_wrap(
-            "Visitor visa applications and outcomes, by nationality, in the year ending March 2023. Top 20 nationalities applying for visitor visas in the year. Data relates to entry clearance visa applications made outside the UK. Includes main applicants and dependants.",
-            width = 28),
-          hjust = 0,
-          vjust = 1)
-grid.text(x = 0.76,
-          y = 0.10,
-          gp = gpar(fontsize = 8),
-          label = str_wrap(
-            "Data from www.gov.uk",
-            width = 28),
-          hjust = 0,
-          vjust = 1)
-# dev.off()
+```{r}
+#| fig-width: 10
+#| fig-height: 9
+plot_uk_visa(visa_uk_dec, year_ending = "December 2023")
 ```
 
