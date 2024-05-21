@@ -299,9 +299,7 @@ function Scatterplot(data, {
 
         const targetID = e.target.id
         const cleanTargetID = targetID.replace(`_${year}`, "")
-
-        console.log({targetID: targetID, cleanTargetID: cleanTargetID})
-
+        
         const labelID = LABEL[ID.indexOf(cleanTargetID)]
 
         var selectedCircle = d3.select(`circle#${targetID}`).node().getBoundingClientRect()
