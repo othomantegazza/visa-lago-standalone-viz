@@ -59,7 +59,8 @@ This analysis contains data from multiple sources:
 # Load development indicators ---------------------------------------------
 
 dev_i <-
-  read_csv('data/WDIData.csv') %>% 
+  # read_csv('data/WDIData.csv') %>% 
+  read_csv('data/WDICSV.csv') %>% 
   clean_names() 
   
 # Extract GDP and clean country names -------------------------------------
@@ -76,10 +77,17 @@ gdp_c <-
     indicator_code, 
     GDP_per_capita_eq_2019 = x2019,
     GDP_per_capita_eq_2021 = x2021,
+    GDP_per_capita_eq_2022 = x2022,
   ) %>% 
-  pivot_longer(c(GDP_per_capita_eq_2019,GDP_per_capita_eq_2021),
-               names_to = 'year',
-               values_to = 'gdp_per_capita') %>% 
+  pivot_longer(
+    cols = c(
+      GDP_per_capita_eq_2019,
+      GDP_per_capita_eq_2021,
+      GDP_per_capita_eq_2022
+    ),
+    names_to = 'year',
+    values_to = 'gdp_per_capita'
+    ) %>% 
   mutate(year = year %>%
            str_remove('GDP_per_capita_eq_') %>%
            as.numeric())
@@ -130,6 +138,11 @@ read_and_clean_visa_stats <- function(path) {
   
   return(visa)
 }
+
+visa_2023 <- 
+  read_and_clean_visa_stats(
+    'data/2023-schengen-visa-statistics-consulates_en.xlsx.xlsx'
+  )
 
 visa_2022 <- 
   read_and_clean_visa_stats(
@@ -262,6 +275,11 @@ model_country_level <- function(visa_stats,
   
   return(country_level)
 }
+
+country_level_2023 <-
+  model_country_level(
+    visa_2023,
+    gdp_c %>% filter(year == 2022))
 
 country_level_2022 <-
   model_country_level(

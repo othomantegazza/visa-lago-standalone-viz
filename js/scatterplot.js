@@ -9,6 +9,7 @@ function Scatterplot(data, {
     fill = ([fill]) => fill,
     id = ([id]) => id,
     label = ([label]) => label,
+    year = 2022,
     marginTop = 40, // top margin, in pixels
     marginRight = 10, // right margin, in pixels
     marginBottom = 50, // bottom margin, in pixels
@@ -105,9 +106,10 @@ function Scatterplot(data, {
         .voronoi(voronoiRange);
 
     // generate tooltip
+    const scatterID = `scatter-tooltip${year}`
     const tooltip = d3.select("body")
         .append("div")
-        .attr("id", "scatter-tooltip")
+        .attr("id", scatterID)
         .style("position", "absolute")
         .style("font-size", `${fontSize}px`)
         .style("transition", "0.1s")
@@ -180,7 +182,7 @@ function Scatterplot(data, {
         .attr("r", i => rScale(R[i]))
         .attr("fill", i => fillPalette[FILL[i]])
         .attr("fill-opacity", fillOpacity)
-        .attr("id", i => ID[i])
+        .attr("id", i => `${ID[i]}_${year}`)
 
         // voronoi grid
         if (voronoiShow) {
@@ -195,7 +197,7 @@ function Scatterplot(data, {
         .data(I)
         .join("path")
         .attr("d", i => voronoi.renderCell(i))
-        .attr("id", i => ID[i])
+        .attr("id", i => `${ID[i]}_${year}`)
         .style("pointer-events", "all")
         .on("mousemove touchstart", (e) => mousemove(e))
         
@@ -296,14 +298,17 @@ function Scatterplot(data, {
             .attr("stroke", "none")
 
         const targetID = e.target.id
+        const cleanTargetID = targetID.replace(`_${year}`, "")
 
-        const labelID = LABEL[ID.indexOf(targetID)]
+        console.log({targetID: targetID, cleanTargetID: cleanTargetID})
+
+        const labelID = LABEL[ID.indexOf(cleanTargetID)]
 
         var selectedCircle = d3.select(`circle#${targetID}`).node().getBoundingClientRect()
         var circleX = selectedCircle.x + selectedCircle.width + scrollX + 5
         var circleY = selectedCircle.y + scrollY - 25
 
-        d3.select('div#scatter-tooltip')
+        d3.select(`div#${scatterID}`)
             .style("visibility", "visible")
             .style("top", `${circleY}px`)
             .style("left", `${circleX}px`)

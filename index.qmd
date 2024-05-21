@@ -45,6 +45,23 @@ ojs_define(
     transpose(.l = .)
   }
 )
+
+ojs_define(
+  country_level_2023 = country_level_2023 %>% 
+    select(
+      consulate_country,
+      consulate_country_code,
+      consulate_country_continent,
+      tot_request,
+      gdp_per_capita,
+      ratio_rejected,
+      fitted = .fitted
+    ) %>% 
+    drop_na() %>% 
+    {
+    transpose(.l = .)
+  }
+)
 ```
 
 ```{ojs}
@@ -61,9 +78,11 @@ cb_palette = {
 }
 ```
 
-## Schengen Visa Rejection Rate in 2022
+## Schengen Visa Rejection Rate
 
 (By country in which the visa application was lodged)
+
+### Year 2022
 
 ```{ojs} 
 Scatterplot(country_level_2022,
@@ -79,6 +98,28 @@ Scatterplot(country_level_2022,
     width: width,
     height: height,
     voronoiShow: false,
+    year: 2022,
+  }
+)
+```
+
+### Year 2023
+
+```{ojs} 
+Scatterplot(country_level_2023,
+  {
+    x: d => d.gdp_per_capita,
+    y: d => d.ratio_rejected,
+    area: d => d.tot_request,
+    fill: d => d.consulate_country_continent,
+    id: d => d.consulate_country_code,
+    label: d => d.consulate_country,
+    fitted: d => d.fitted,
+    fillPalette: cb_palette,
+    width: width,
+    height: height,
+    voronoiShow: false,
+    year: 2023
   }
 )
 ```
@@ -236,5 +277,12 @@ plot_uk_visa(visa_uk_mar, year_ending = "March 2023")
 #| fig-width: 10
 #| fig-height: 9
 plot_uk_visa(visa_uk_dec, year_ending = "December 2023")
+```
+
+```{r}
+#| message: false
+# svglite::svglite("output/uk-year-ending-dec-2023.svg")
+# plot_uk_visa(visa_uk_dec, year_ending = "December 2023")
+# dev.off()
 ```
 
