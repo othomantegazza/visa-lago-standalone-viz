@@ -43,7 +43,12 @@ cb_palette <-
     Oceania = '#AA3377')
 
 highlight_countries <- c(
-  'PAK'
+  'DZA',
+  'NGA',
+  'GHA',
+  'SEN',
+  'MAR',
+  'ZAF'
   )
 ```
 
@@ -91,6 +96,9 @@ gdp_c <-
   mutate(year = year %>%
            str_remove('GDP_per_capita_eq_') %>%
            as.numeric())
+
+	
+
 ```
 
 2. Schengen short-stay visa statistics, downloaded manually from the [European Commission's Website](https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/visa-policy_en#paragraph_1903).
@@ -454,6 +462,19 @@ plot_model(country_level_2022_exempt,
            title = "Schengen Visa Rejection Rate in 2022 - Exempt States",
            model = FALSE)
 ```
+
+```{r}
+#| column: screen-inset-right
+#| fig-width: 10
+
+set.seed(1);plot_model(
+  country_level_2023,
+  year = 2023,
+  gdp_year = 2022,
+  title = "Schengen Visa Rejection Rate in 2023"
+)
+```
+
 
 ```{r}
 #| eval: false
