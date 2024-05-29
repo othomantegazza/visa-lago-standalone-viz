@@ -190,8 +190,16 @@ visa_uk_dec <-
 ```
 
 ```{r}
-plot_uk_visa <- function(visa_uk, year_ending = "March 2023") 
-{
+custom_currency_scale <- 
+  scales::label_currency(
+    prefix = "£ ",
+    accuracy = .1,
+    scale_cut = scales::cut_short_scale()
+  )
+
+plot_uk_visa <- function(visa_uk, 
+                         year_ending = "March 2023",
+                         show_cost = TRUE) {
 
  visa_uk <- 
   visa_uk %>% 
@@ -241,6 +249,28 @@ plot_uk_visa <- function(visa_uk, year_ending = "March 2023")
                                             size = .1),
           # axis.title = element_text(hjust = 1),
           legend.justification = "top")
+
+  if(show_cost) {
+    p <-
+      p +
+      geom_text(
+        aes(
+          x = 1,
+          label = paste(
+                  refusal %>% `*`(100) %>% map_chr(custom_currency_scale)
+              ),
+        ),
+        hjust = 1
+      ) +
+      annotate(
+        label = "Loss to rejections:",
+        geom = "text",
+        x = 1,
+        y = 21.2,
+        vjust = 1,
+        hjust = 1
+      )
+  }
   
   # ggsave(plot = p,
   #        filename = 'output/uk-visa.jpg',
