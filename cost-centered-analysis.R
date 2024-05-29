@@ -8,6 +8,8 @@ schengen_2023 <-
   read_csv("data/2023-country-level-clean.csv")
 
 visa_cost <- 80 # euro
+size_scale <- 2.8455
+text_size <- 4
 
 # Load development indicators -----------------------------------
 
@@ -190,15 +192,26 @@ for_barchart_labels <-
 custom_currency_scale <- 
   scales::label_currency(
     prefix = "€",
-    accuracy = 1,
+    accuracy = .1,
     scale_cut = scales::cut_short_scale()
+  )
+
+custom_number_scale <- 
+  scales::label_number(
+    accuracy = .1,
+    scale_cut = scales::cut_short_scale()
+  )
+
+custom_percent_scale <- 
+  scales::label_percent(
+    accuracy = .1
   )
 
 for_barchart %>% 
   mutate(type = type %>% {
     case_when(
-      . == "cost_lost" ~ "Value Lost To Rejected Visa Applications",
-      . == "cost_estimate" ~ "Total Visa Applications",
+      . == "cost_lost" ~ "Value lost to visa rejection (80 euro per rejected visa)",
+      . == "cost_estimate" ~ "Total count of visa applications",
     )
   } %>% 
     str_wrap(15)) %>% 
@@ -227,6 +240,7 @@ for_barchart %>%
       y = 2 + nudge/2,
       label = consulate_country_continent
     ),
+    size = text_size,
     hjust = -0.1,
     vjust = -.5
   ) +
@@ -239,9 +253,27 @@ for_barchart %>%
       x = cost_lost_positon,
       y = 2 + nudge/2,
       label = paste(
-        custom_currency_scale(cost_lost)
+        custom_percent_scale(perc_rejection),
+        custom_currency_scale(cost_lost),
+        sep = "\n"
       )
     ),
+    size = text_size,
+    hjust = -0.1,
+    vjust = 1.2
+  ) +
+  geom_text(
+    data = for_barchart_labels,
+    aes(
+      x = cost_estimate_position,
+      y = 1 + nudge/2,
+      label = paste(
+        custom_percent_scale(perc_request),
+        custom_number_scale(tot_request),
+        sep = "\n"
+      )
+    ),
+    size = text_size,
     hjust = -0.1,
     vjust = 1.2
   ) +
@@ -252,11 +284,23 @@ for_barchart %>%
       Others = "grey80"
     )
   ) +
+  guides(fill = "none") +
   theme(
     panel.grid = element_blank(),
     legend.position = "bottom",
-    axis.text.y = element_text(vjust = .5)
+    axis.text.y = element_text(
+      vjust = .5, 
+      size = text_size*size_scale,
+      colour = "black"
+    ),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.x = element_blank()
   )
+
+ggsave(filename = "output/barchart-value-lost.jpeg",
+       width = 8,
+       height = 2.9)
 
 # rejection rates and costs -------------------------------------
 
