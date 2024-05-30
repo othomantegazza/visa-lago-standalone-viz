@@ -1,6 +1,9 @@
 library(tidyverse)
 library(janitor)
 library(ggforce)
+library(gtable)
+library(grid)
+library(gridtext)
 
 theme_set(theme_minimal())
 
@@ -82,7 +85,6 @@ gdp_c_simple_2022 <-
            as.numeric()) %>% 
   filter(year == 2022)
 
-
 # put everything together ---------------------------------------
 
 schengen__2023_cost <- 
@@ -107,6 +109,7 @@ schengen__2023_cost <-
 # rejection bar chart -------------------------------------------
 
 nudge <- .7
+header_y <- 1.51
 
 for_barchart <- 
   schengen__2023_cost %>% 
@@ -205,7 +208,8 @@ custom_percent_scale <-
     accuracy = 1
   )
 
-for_barchart %>% 
+p_cost <- 
+  for_barchart %>% 
   filter(type == "cost_lost") %>% 
   ggplot() +
   aes(x = cost_ratio,
@@ -247,15 +251,15 @@ for_barchart %>%
   annotate(
     x = 0,
     xend = 1,
-    y = 1.5,
-    yend = 1.5,
+    y = header_y,
+    yend = header_y,
     geom = "segment",
     arrow = arrow(length = unit(5, "mm"))
   ) +
   geom_label(
     data = . %>% 
       summarise(cost = sum(cost)),
-    aes(y = 1.5,
+    aes(y = header_y,
         x = 0,
         label = paste(
           "Tot:",
@@ -273,6 +277,8 @@ for_barchart %>%
     )
   ) +
   guides(fill = "none") +
+  labs(title = "Cost of Schengen Visa Rejections In 2023",
+       subtitle = "Estimated on a € 80 application fee") +
   theme(
     panel.grid = element_blank(),
     legend.position = "bottom",
@@ -282,9 +288,32 @@ for_barchart %>%
     axis.text.x = element_blank()
   )
 
-ggsave(filename = "output/barchart-value-lost.jpeg",
-       width = 8,
-       height = 2.9)
+side_text <- 
+  textbox_grob(
+    glue::glue(
+      "Total Visa Applications:<br>",
+      "- Africa,<br>",
+      "- Asia,<br>",
+      "- Others"
+    ),
+    use_markdown = F,
+    vjust = 1
+    )
+
+p_cost_grob <- p_cost %>% ggplotGrob() 
+grid.newpage();p_cost_grob %>% 
+  gtable_add_cols(widths = unit(3, "cm")) %>% 
+  gtable_add_grob(grobs = side_text,
+                  l = 14, t = 9) %>% 
+  # gtable_show_layout() %>% 
+  grid.draw()
+
+ggsave(
+  filename = "output/barchart-value-lost.jpeg", 
+  plot = p_cost,
+  width = 8,
+  height = 3
+  )
 
 # rejection rates and costs -------------------------------------
 
