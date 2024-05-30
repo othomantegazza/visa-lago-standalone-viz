@@ -189,14 +189,14 @@ for_barchart_labels <-
 
 custom_currency_scale <- 
   scales::label_currency(
-    prefix = "€",
-    accuracy = .1,
+    prefix = "€ ",
+    accuracy = 1,
     scale_cut = scales::cut_short_scale()
   )
 
 custom_number_scale <- 
   scales::label_number(
-    accuracy = .1,
+    accuracy = 1,
     scale_cut = scales::cut_short_scale()
   )
 
