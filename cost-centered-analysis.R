@@ -4,6 +4,8 @@ library(ggforce)
 library(gtable)
 library(grid)
 library(gridtext)
+library(ggrepel)
+library(glue)
 
 theme_set(theme_minimal())
 
@@ -289,6 +291,7 @@ p_cost <-
       "- Others  {requests_others %>% custom_number_scale()}",
       " ({custom_percent_scale(requests_others/tot_requests)})"
     ),
+    size = text_size,
     hjust = 0,
     vjust = 1
   ) +
@@ -351,6 +354,251 @@ ggsave(
   width = 8,
   height = 3
   )
+
+
+# uk data -------------------------------------------------------
+
+library(tidyverse)
+library(janitor)
+library(countrycode)
+library(grid)
+
+cb_palette <- 
+  c(Africa = '#339944',
+    Americas = '#DDCC55',
+    Asia = '#5588BB',
+    Europe = '#EE6677',
+    Oceania = '#AA3377')
+
+visa_uk_mar <- 
+  read_tsv('data/UK-visas-summary-mar-2023-tables.tsv')
+
+visa_uk_dec <- 
+  read_tsv('data/UK-visas-summary-dec-2023-tables.tsv')
+
+custom_currency_scale_uk <- 
+  scales::label_currency(
+    prefix = "£ ",
+    accuracy = .1,
+    scale_cut = c(M=1e6)#scales::cut_short_scale()
+  )
+
+plot_uk_visa <- function(visa_uk, 
+                         year_ending = "March 2023",
+                         show_cost = TRUE) {
+  
+  visa_uk <- 
+    visa_uk %>% 
+    mutate(grant_rate = grant_rate %>% str_remove('%') %>% as.numeric()) %>% 
+    mutate(grant_rate = grant_rate/100,
+           rej_rate = 1-grant_rate) %>% 
+    mutate(continent = countrycode(nationality,
+                                   origin = 'country.name',
+                                   destination = 'continent'))
+  
+  p <-
+    visa_uk %>% 
+    arrange(desc(rej_rate)) %>% 
+    mutate(nationality = nationality %>% as_factor()) %>% 
+    ggplot() +
+    aes(y = nationality,
+        x = rej_rate) +
+    geom_segment(aes(yend = after_stat(y),
+                     xend = 0),
+                 linewidth = .5,
+                 lty = '11') +
+    geom_point(aes(size = resolved,
+                   fill = continent),
+               alpha = 1,
+               pch = 21) +
+    geom_vline(xintercept = 0,
+               linewidth = 1.5) +
+    labs(x = "Visa Rejection Rate",
+         y = "Nationality",
+         size = "Size:\nApplications Received",
+         fill = "Colour:\nContinent",
+         title = "UK Visitor Visa Rejection Rate by Nationality",
+         subtitle = glue::glue("Year Ending {year_ending}")) +
+    guides(fill = guide_legend(override.aes = list(size = 5)),
+           size = guide_legend(override.aes = list(shape = 21,
+                                                   fill = "white"))) +
+    scale_x_continuous(limits = c(0, 1.05),
+                       labels = scales::percent,
+                       expand = expansion(0, 0),
+                       breaks = c(0, .2, .4, .6, .8, 1)) +
+    scale_size_continuous(range = c(0, 15),
+                          labels = scales::comma) +
+    scale_fill_manual(values = cb_palette) +
+    theme_minimal(base_size = text_size*size_scale) +
+    theme(panel.grid.major.y = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.grid.major.x = element_line(colour = 'black',
+                                            size = .1),
+          # axis.title = element_text(hjust = 1),
+          # legend.justification = "top"
+          )
+  
+  if(show_cost) {
+    p <-
+      p +
+      geom_text_repel(
+        data = . %>%
+          filter(
+            nationality %in% c(
+              "Nigeria",
+              "Pakistan",
+              "Albania",
+              "Algeria",
+              "Bangladesh",
+              "Ghana",
+              "Morocco"
+            )
+          ),
+        aes(
+          x = rej_rate,
+          label = paste(
+            refusal %>% `*`(100) %>% map_chr(custom_currency_scale_uk)
+          ),
+          hjust = -.2 - (resolved/max(resolved))/4
+        ),
+        colour = 'black',
+        min.segment.length = 0, 
+        nudge_x = .03,
+        size = 3,
+        direction = 'y',
+        force = .1, 
+        segment.size = 0.2
+      ) 
+  }
+  
+  # p <- ggplotGrob(p)
+
+  # grid.newpage()
+  # grid.draw(p)
+  # grid.text(x = 0.76,
+  #           y = 0.4,
+  #           gp = gpar(fontsize = 12),
+  #           label = str_wrap(
+  #             glue::glue("Visitor visa applications and outcomes, by nationality, in the year ending {year_ending}. Top 20 nationalities applying for visitor visas in the year. Data relates to entry clearance visa applications made outside the UK. Includes main applicants and dependants."),
+  #             width = 28),
+  #           hjust = 0,
+  #           vjust = 1)
+  return(p)
+}
+
+p_uk <- plot_uk_visa(visa_uk_dec, year_ending = "December 2023")
+
+ggsave(
+  filename = "output/uk-for-cost-analysis.jpeg",
+  plot = p_uk,
+  height = 8,
+  width = 8
+)
+
+
+# rejection rate model ------------------------------------------
+
+country_level_2023 <- read_csv("data/2023-country-level-clean.csv")
+
+
+cb_palette <- 
+  c(Africa = '#228833',
+    Americas = '#CCBB44',
+    Asia = '#4477AA',
+    Europe = '#EE6677',
+    Oceania = '#AA3377')
+
+highlight_countries <- c(
+  'DZA',
+  'NGA',
+  'GHA',
+  'SEN',
+  'MAR',
+  'ZAF'
+)
+
+plot_model <- function(modelled_data,
+                       year,
+                       gdp_year,
+                       title =  glue("Schengen Visa Rejection Rate in {year}"),
+                       model = TRUE,
+                       width = 10,
+                       ratio = 4/3) {
+  country_level_scatter <- 
+    modelled_data %>% 
+    drop_na(consulate_country_continent) %>% 
+    # drop_na(GDP_per_capita_eq_2021, ratio_rejected) %>% 
+    ggplot() +
+    aes(x = gdp_per_capita,
+        colour = consulate_country_continent,
+        y = ratio_rejected) +
+    {if(model)geom_line(aes(y = .fitted),
+                        colour = 'grey30',
+                        lty = '31',
+                        size = 0.8)} +
+    geom_hline(yintercept = 0) +
+    geom_vline(xintercept = 0) +
+    geom_point(aes(size = tot_request),
+                           alpha = .9) +
+    labs(x = glue('GDP per Capita from previous year in equivalent dollars ($)'),
+         y = 'Percent of Applications Rejected',
+         size = "Size:\nApplications Received",
+         colour = "Colour:\nContinent",
+         title = title,
+         subtitle = "(By country in which the visa application was lodged)") +
+    guides(colour = guide_legend(override.aes = list(size = 5)),
+           size = guide_legend(override.aes = list(shape = 21,
+                                                   fill = "white"))) +
+    scale_size_continuous(labels = scales::comma,
+                          range = c(0, 15),
+                          breaks = c(1e3, 1e4, 1e5, 1e6)) +
+    scale_y_continuous(labels = scales::percent,
+                       limits = c(0, NA)) +
+    scale_x_continuous(limits = c(0, NA)) + 
+    scale_colour_manual(values = cb_palette) +
+    theme_minimal(base_size = text_size*size_scale) 
+  
+  
+  ggsave(filename = glue('output/{title}-labels-WIDE.jpg'), 
+         plot = country_level_scatter +
+           geom_text_repel(
+             data = . %>% filter(
+               consulate_country_code %in% highlight_countries
+             ),
+             mapping = aes(label = consulate_country),
+             colour = 'black',
+             min.segment.length = 0, 
+             # nudge_x = 2e4,
+             # nudge_y = .1, 
+             xlim = c(3e4, NA),
+             ylim = c(0.25, NA),
+             size = 3,
+             direction = 'y',
+             force = .1, 
+             segment.size = 0.2,
+           ),
+         # theme(legend.position = "bottom",
+         #       legend.box="vertical"),
+         width = width,
+         height = width/ratio) 
+  
+  ggsave(filename = glue('output/{title}-WIDE.jpg'),
+         plot = country_level_scatter,
+         # theme(legend.position = "bottom",
+         #       legend.box="vertical"),
+         width = width,
+         height = width/ratio)
+  
+  
+  return(country_level_scatter)
+}
+
+set.seed(1);plot_model(
+  country_level_2023,
+  year = 2023,
+  gdp_year = 2022,
+  title = "Schengen Visa Rejection Rate in 2023"
+)
 
 # rejection rates and costs -------------------------------------
 
