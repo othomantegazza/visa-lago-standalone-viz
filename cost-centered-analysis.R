@@ -286,13 +286,14 @@ for_barchart %>%
   theme(
     panel.grid = element_blank(),
     legend.position = "bottom",
-    axis.text.y = element_text(
-      vjust = .5, 
-      size = text_size*size_scale,
-      colour = "black"
-    ),
+    # axis.text.y = element_text(
+    #   vjust = .5, 
+    #   size = text_size*size_scale,
+    #   colour = "black"
+    # ),
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
     axis.text.x = element_blank()
   )
 
