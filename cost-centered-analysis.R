@@ -206,14 +206,7 @@ custom_percent_scale <-
   )
 
 for_barchart %>% 
-  filter(type == "cost_lost") %>% 
-  mutate(type = type %>% {
-    case_when(
-      . == "cost_lost" ~ "Value lost to visa rejection (80 euro per rejected visa)",
-      . == "cost_estimate" ~ "Total count of visa applications",
-    )
-  } %>% 
-    str_wrap(15)) %>% 
+  filter(type == "cost_lost") 
   ggplot() +
   aes(x = cost_ratio,
       y = type) +
