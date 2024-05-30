@@ -202,11 +202,11 @@ custom_number_scale <-
 
 custom_percent_scale <- 
   scales::label_percent(
-    accuracy = .1
+    accuracy = 1
   )
 
 for_barchart %>% 
-  filter(type == "cost_lost") 
+  filter(type == "cost_lost") %>% 
   ggplot() +
   aes(x = cost_ratio,
       y = type) +
@@ -243,6 +243,27 @@ for_barchart %>%
     size = text_size,
     hjust = -0.1,
     vjust = 1.2
+  ) +
+  annotate(
+    x = 0,
+    xend = 1,
+    y = 1.5,
+    yend = 1.5,
+    geom = "segment",
+    arrow = arrow(length = unit(5, "mm"))
+  ) +
+  geom_label(
+    data = . %>% 
+      summarise(cost = sum(cost)),
+    aes(y = 1.5,
+        x = 0,
+        label = paste(
+          "Tot:",
+          cost %>% custom_currency_scale())
+    ),
+    hjust = 0,
+    fill = "white",
+    label.size = 0
   ) +
   scale_fill_manual(
     values = c(
