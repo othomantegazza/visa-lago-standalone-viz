@@ -190,6 +190,26 @@ for_barchart_labels <-
   mutate(perc_rejection = not_issued/sum(not_issued),
          perc_request = tot_request/sum(tot_request))
 
+tot_requests <- 
+  for_barchart_labels %>% 
+  pull(tot_request) %>% 
+  sum()
+
+requests_africa <- 
+  for_barchart_labels %>% 
+  filter(consulate_country_continent == "Africa") %>% 
+  pull(tot_request)
+
+requests_asia <- 
+  for_barchart_labels %>% 
+  filter(consulate_country_continent == "Asia") %>% 
+  pull(tot_request)
+
+requests_others <- 
+  for_barchart_labels %>% 
+  filter(consulate_country_continent == "Others") %>% 
+  pull(tot_request)
+
 custom_currency_scale <- 
   scales::label_currency(
     prefix = "€ ",
@@ -199,7 +219,7 @@ custom_currency_scale <-
 
 custom_number_scale <- 
   scales::label_number(
-    accuracy = 1,
+    accuracy = .1,
     scale_cut = scales::cut_short_scale()
   )
 
@@ -208,7 +228,7 @@ custom_percent_scale <-
     accuracy = 1
   )
 
-p_cost <- 
+p_cost <-
   for_barchart %>% 
   filter(type == "cost_lost") %>% 
   ggplot() +
@@ -256,6 +276,22 @@ p_cost <-
     geom = "segment",
     arrow = arrow(length = unit(5, "mm"))
   ) +
+  annotate(
+    geom = "text",
+    y = 1 + nudge/2,
+    x = 1.03,
+    label = glue::glue(
+      "Total Applications:\n\n",
+      "- Africa {requests_africa %>% custom_number_scale()}",
+      " ({custom_percent_scale(requests_africa/tot_requests)})\n",
+      "- Asia {requests_asia %>% custom_number_scale()}",
+      " ({custom_percent_scale(requests_asia/tot_requests)})\n",
+      "- Others  {requests_others %>% custom_number_scale()}",
+      " ({custom_percent_scale(requests_others/tot_requests)})"
+    ),
+    hjust = 0,
+    vjust = 1
+  ) +
   geom_label(
     data = . %>% 
       summarise(cost = sum(cost)),
@@ -276,6 +312,7 @@ p_cost <-
       Others = "grey80"
     )
   ) +
+  scale_x_continuous(expand = expansion(mult = c(0.003, .27))) +
   guides(fill = "none") +
   labs(title = "Cost of Schengen Visa Rejections In 2023",
        subtitle = "Estimated on a € 80 application fee") +
@@ -288,25 +325,25 @@ p_cost <-
     axis.text.x = element_blank()
   )
 
-side_text <- 
-  textbox_grob(
-    glue::glue(
-      "Total Visa Applications:<br>",
-      "- Africa,<br>",
-      "- Asia,<br>",
-      "- Others"
-    ),
-    use_markdown = F,
-    vjust = 1
-    )
-
-p_cost_grob <- p_cost %>% ggplotGrob() 
-grid.newpage();p_cost_grob %>% 
-  gtable_add_cols(widths = unit(3, "cm")) %>% 
-  gtable_add_grob(grobs = side_text,
-                  l = 14, t = 9) %>% 
-  # gtable_show_layout() %>% 
-  grid.draw()
+# side_text <- 
+#   textbox_grob(
+#     glue::glue(
+#       "Total Visa Applications:<br>",
+#       "- Africa,<br>",
+#       "- Asia,<br>",
+#       "- Others"
+#     ),
+#     use_markdown = F,
+#     vjust = 1
+#     )
+# 
+# p_cost_grob <- p_cost %>% ggplotGrob() 
+# grid.newpage();p_cost_grob %>% 
+#   gtable_add_cols(widths = unit(3, "cm")) %>% 
+#   gtable_add_grob(grobs = side_text,
+#                   l = 14, t = 9) %>% 
+#   # gtable_show_layout() %>% 
+#   grid.draw()
 
 ggsave(
   filename = "output/barchart-value-lost.jpeg", 
