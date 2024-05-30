@@ -104,8 +104,6 @@ schengen__2023_cost <-
   mutate(cost_lost = not_issued*visa_cost,
          cost_estimate = tot_request*visa_cost)
 
-
-
 # rejection bar chart -------------------------------------------
 
 nudge <- .7
@@ -121,7 +119,7 @@ for_barchart <-
           TRUE ~ "Others"
         )
       }
-    ) %>% 
+  ) %>% 
   summarise(
     cost_estimate = cost_estimate %>% sum(na.rm = T),
     cost_lost = cost_lost %>% sum(na.rm = T),
@@ -149,8 +147,8 @@ for_barchart <-
       )
     )
   ) 
-  # arrange(consulate_country_continent, type) %>% 
-  # mutate(next_cost = cost_ratio[c(2:n(), 1)]) 
+# arrange(consulate_country_continent, type) %>% 
+# mutate(next_cost = cost_ratio[c(2:n(), 1)]) 
 
 for_barchart_con <- 
   for_barchart %>% 
@@ -175,7 +173,7 @@ for_barchart_labels <-
   mutate(
     cost_lost_positon = cost_lost_positon[c(n(),1:(n()-1))],
     cost_estimate_position = cost_estimate_position[c(n(),1:(n()-1))]
-    ) %>% 
+  ) %>% 
   left_join(
     for_barchart %>% 
       select(-cost_ratio) %>% 
