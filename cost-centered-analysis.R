@@ -206,6 +206,7 @@ custom_percent_scale <-
   )
 
 for_barchart %>% 
+  filter(type == "cost_lost") %>% 
   mutate(type = type %>% {
     case_when(
       . == "cost_lost" ~ "Value lost to visa rejection (80 euro per rejected visa)",
@@ -221,21 +222,11 @@ for_barchart %>%
     colour = "black",
     width = nudge
   ) +
-  geom_segment(
-    data = for_barchart_con,
-    aes(
-      y = 1 + nudge/2,
-      yend = 2 - nudge/2,
-      x = cost_estimate,
-      xend = cost_lost
-    ),
-    linetype = "11"
-  ) +
   geom_text(
     data = for_barchart_labels,
     aes(
       x = cost_lost_positon,
-      y = 2 + nudge/2,
+      y = 1 + nudge/2,
       label = consulate_country_continent
     ),
     size = text_size,
@@ -249,25 +240,10 @@ for_barchart %>%
     data = for_barchart_labels,
     aes(
       x = cost_lost_positon,
-      y = 2 + nudge/2,
+      y = 1 + nudge/2,
       label = paste(
         custom_percent_scale(perc_rejection),
         custom_currency_scale(cost_lost),
-        sep = "\n"
-      )
-    ),
-    size = text_size,
-    hjust = -0.1,
-    vjust = 1.2
-  ) +
-  geom_text(
-    data = for_barchart_labels,
-    aes(
-      x = cost_estimate_position,
-      y = 1 + nudge/2,
-      label = paste(
-        custom_percent_scale(perc_request),
-        custom_number_scale(tot_request),
         sep = "\n"
       )
     ),
@@ -286,11 +262,6 @@ for_barchart %>%
   theme(
     panel.grid = element_blank(),
     legend.position = "bottom",
-    # axis.text.y = element_text(
-    #   vjust = .5, 
-    #   size = text_size*size_scale,
-    #   colour = "black"
-    # ),
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
     axis.text.y = element_blank(),
