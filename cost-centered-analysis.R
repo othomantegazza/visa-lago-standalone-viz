@@ -277,8 +277,8 @@ for_barchart %>%
   ) +
   scale_fill_manual(
     values = c(
-      Africa = colorspace::lighten('#228833', .5),
-      Asia = colorspace::lighten('#4477AA', .5),
+      Africa = colorspace::lighten('#228833', .3),
+      Asia = colorspace::lighten('#4477AA', .3),
       Others = "grey80"
     )
   ) +
