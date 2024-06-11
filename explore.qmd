@@ -475,6 +475,10 @@ set.seed(1);plot_model(
 )
 ```
 
+```{r}
+# save(country_level_2023, "data/count")
+```
+
 
 ```{r}
 #| eval: false

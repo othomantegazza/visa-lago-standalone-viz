@@ -193,8 +193,8 @@ visa_uk_dec <-
 custom_currency_scale <- 
   scales::label_currency(
     prefix = "£ ",
-    accuracy = .1,
-    scale_cut = scales::cut_short_scale()
+    accuracy = 1,
+    scale_cut = c(k=1e3)#scales::cut_short_scale()
   )
 
 plot_uk_visa <- function(visa_uk, 
@@ -254,21 +254,32 @@ plot_uk_visa <- function(visa_uk,
     p <-
       p +
       geom_text(
+        data = . %>%
+        filter(
+          nationality %in% c(
+            "Nigeria",
+            "Pakistan",
+            "Algeria",
+            "Bangladesh",
+            "Ghana",
+            "Morocco"
+          )
+        ),
         aes(
-          x = 1,
+          x = rej_rate,
           label = paste(
                   refusal %>% `*`(100) %>% map_chr(custom_currency_scale)
               ),
-        ),
-        hjust = 1
+          hjust = -.2 - (resolved/max(resolved))/4
+        )
       ) +
       annotate(
-        label = "Loss to rejections:",
+        label = "↓ Cost of rejections in thousands of British pounds",
         geom = "text",
-        x = 1,
+        x = .07,
         y = 21.2,
         vjust = 1,
-        hjust = 1
+        hjust = 0
       )
   }
   
@@ -310,7 +321,8 @@ plot_uk_visa <- function(visa_uk,
 ```{r}
 #| fig-width: 10
 #| fig-height: 9
-plot_uk_visa(visa_uk_mar, year_ending = "March 2023")
+plot_uk_visa(visa_uk_mar, year_ending = "March 2023",
+             show_cost = F)
 ```
 
 ### Year Ending December 2023
@@ -318,7 +330,8 @@ plot_uk_visa(visa_uk_mar, year_ending = "March 2023")
 ```{r}
 #| fig-width: 10
 #| fig-height: 9
-plot_uk_visa(visa_uk_dec, year_ending = "December 2023")
+plot_uk_visa(visa_uk_dec, year_ending = "December 2023",
+             show_cost = F)
 ```
 
 ```{r}
@@ -328,3 +341,11 @@ plot_uk_visa(visa_uk_dec, year_ending = "December 2023")
 # dev.off()
 ```
 
+## Access to the Data
+
+The dataset utilised for the analysis of short-term visa regimes is available [here](https://docs.google.com/spreadsheets/d/1Cy6cpS03LtGuitxJVjffzyTMEdkRrECj/). It includes rejection rates and the associated costs of rejections for both Schengen and UK visa applications. When referencing this analysis, please acknowledge Marta Foresti - Founder, LAGO Collective & Visiting Senior Fellow, ODI and Otho Mantegazza - Research Scientist, Data Analyst.
+
+The original data is sourced from:
+
+- [Directorate-General for Migration and Home Affairs of the European Commission](https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/visa-policy/short-stay-visas-issued-schengen-countries_en) (Schengen)
+- [UK Home Office](https://www.gov.uk/government/statistical-data-sets/immigration-system-statistics-data-tables#entry-clearance-visas-granted-outside-the-uk) (UK)
