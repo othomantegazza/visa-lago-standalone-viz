@@ -73,7 +73,8 @@ dev_i <-
 gdp_c <- 
   dev_i %>% 
   filter(
-    indicator_name == 'GDP per capita, PPP (current international $)'
+    # indicator_name == 'GDP per capita, PPP (current international $)'
+    indicator_name == 'GNI per capita, Atlas method (current US$)'
   ) %>% 
   select(
     country_name,
