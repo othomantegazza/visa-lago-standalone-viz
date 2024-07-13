@@ -21,12 +21,21 @@ format:
       gutter-width: 0rem
     # page-layout: custom 
     margin-left: 20px
-    margin-top: 10px 
     margin-right: 30px
     margin-bottom: 10px
     fontsize: 16px
 
-
+website:
+  navbar:
+    background: "#55292a"
+    search: false
+    logo: assets/images/logo-coral.svg
+    logo-alt: Lago Collective
+    logo-href: https://www.lagocollective.org/
+    title: " "
+  page-footer: 
+    center: |    
+      <a href="https://lagocollective.org/work" style="color: black;">See LAGO&apos;s work &rarr;</a>
 
 
 
