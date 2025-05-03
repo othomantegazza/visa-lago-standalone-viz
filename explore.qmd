@@ -149,23 +149,23 @@ read_and_clean_visa_stats <- function(path) {
 
 visa_2023 <- 
   read_and_clean_visa_stats(
-    'data/2023-schengen-visa-statistics-consulates_en.xlsx.xlsx'
+    'data/visa/2023-schengen-visa-statistics-consulates_en.xlsx.xlsx'
   )
 
 visa_2022 <- 
   read_and_clean_visa_stats(
-    'data/Visa statistics for consulates in 2022_en.xlsx'
+    'data/visa/Visa statistics for consulates in 2022_en.xlsx'
   )
 
 visa_2019 <- 
   read_and_clean_visa_stats(
-    'data/2019-consulates-schengen-visa-stats.xlsx'
+    'data/visa/2019-consulates-schengen-visa-stats.xlsx'
   )
 ```
 
 ```{r}
 exempt <-
-  read_csv('data/short-stay-visa-exempt.csv') %>% 
+  read_csv('data/utils/short-stay-visa-exempt.csv') %>% 
   mutate(country_code = country_name %>% 
            countrycode(
              origin = 'country.name',
@@ -182,7 +182,7 @@ schengen_states <-
          country_code = schengen_state_code)
 
 eu_27 <- 
-  read_csv('data/eu-eurostat-codes.csv') %>% 
+  read_csv('data/utils/eu-eurostat-codes.csv') %>% 
   mutate(country_code = country %>% 
            countrycode(
              origin = 'country.name',

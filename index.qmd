@@ -10,7 +10,7 @@ execute:
 <script src="js/scatterplot.js"></script>
 
 ```{r}
-# include: false
+#| include: false
 oldwd <- getwd()
 #setwd('~/Desktop/visa-lago/')
 source(knitr::purl('explore.qmd'))
@@ -25,7 +25,7 @@ country_level_2022 %>%
     ratio_rejected,
     fitted = .fitted
   ) %>% 
-  write_csv('data/2022-country-level-clean.csv')
+  write_csv('data/formatted/2022-country-level-clean.csv')
 
 country_level_2023 %>% 
   # select(
@@ -37,7 +37,7 @@ country_level_2023 %>%
   #   ratio_rejected,
   #   fitted = .fitted
   # ) %>% 
-  write_csv('data/2023-country-level-clean.csv')
+  write_csv('data/formatted/2023-country-level-clean.csv')
 ```
 
 ```{r}
@@ -183,10 +183,10 @@ cb_palette <-
 
 ```{r}
 visa_uk_mar <- 
-  read_tsv('data/UK-visas-summary-mar-2023-tables.tsv')
+  read_tsv('data/visaUK/UK-visas-summary-mar-2023-tables.tsv')
 
 visa_uk_dec <- 
-  read_tsv('data/UK-visas-summary-dec-2023-tables.tsv')
+  read_tsv('data/visaUK/UK-visas-summary-dec-2023-tables.tsv')
 ```
 
 ```{r}
