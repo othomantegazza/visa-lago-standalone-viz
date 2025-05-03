@@ -10,7 +10,7 @@ execute:
 <script src="js/scatterplot.js"></script>
 
 ```{r}
-#| include: false
+# include: false
 oldwd <- getwd()
 #setwd('~/Desktop/visa-lago/')
 source(knitr::purl('explore.qmd'))
