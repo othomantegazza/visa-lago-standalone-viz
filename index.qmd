@@ -38,6 +38,7 @@ country_level_2023 %>%
   #   fitted = .fitted
   # ) %>% 
   write_csv('data/formatted/2023-country-level-clean.csv')
+
 ```
 
 ```{r}
@@ -60,6 +61,23 @@ ojs_define(
 
 ojs_define(
   country_level_2023 = country_level_2023 %>% 
+    select(
+      consulate_country,
+      consulate_country_code,
+      consulate_country_continent,
+      tot_request,
+      gdp_per_capita,
+      ratio_rejected,
+      fitted = .fitted
+    ) %>% 
+    drop_na() %>% 
+    {
+    transpose(.l = .)
+  }
+)
+
+ojs_define(
+  country_level_2024 = country_level_2023 %>% 
     select(
       consulate_country,
       consulate_country_code,
@@ -132,6 +150,27 @@ Scatterplot(country_level_2023,
     height: height,
     voronoiShow: false,
     year: 2023
+  }
+)
+```
+
+### Year 2024
+
+```{ojs} 
+Scatterplot(country_level_2024,
+  {
+    x: d => d.gdp_per_capita,
+    y: d => d.ratio_rejected,
+    area: d => d.tot_request,
+    fill: d => d.consulate_country_continent,
+    id: d => d.consulate_country_code,
+    label: d => d.consulate_country,
+    fitted: d => d.fitted,
+    fillPalette: cb_palette,
+    width: width,
+    height: height,
+    voronoiShow: false,
+    year: 2024
   }
 )
 ```
@@ -326,6 +365,15 @@ plot_uk_visa(visa_uk_mar, year_ending = "March 2023",
 ```
 
 ### Year Ending December 2023
+
+```{r}
+#| fig-width: 10
+#| fig-height: 9
+plot_uk_visa(visa_uk_dec, year_ending = "December 2023",
+             show_cost = F)
+```
+
+### Test 2024
 
 ```{r}
 #| fig-width: 10
