@@ -39,6 +39,8 @@ country_level_2023 %>%
   # ) %>% 
   write_csv('data/formatted/2023-country-level-clean.csv')
 
+## NEEDS UPDATE
+
 ```
 
 ```{r}
@@ -76,8 +78,9 @@ ojs_define(
   }
 )
 
+## NEEDS UPDATE
 ojs_define(
-  country_level_2024 = country_level_2023 %>% 
+  country_level_2024 = country_level_2024 %>% 
     select(
       consulate_country,
       consulate_country_code,
@@ -226,6 +229,9 @@ visa_uk_mar <-
 
 visa_uk_dec <- 
   read_tsv('data/visaUK/UK-visas-summary-dec-2023-tables.tsv')
+
+visa_uk_dec2024 <- 
+  read_tsv('data/visaUK/UK-visas-summary-dec-2024-tables.tsv')
 ```
 
 ```{r}
@@ -373,12 +379,12 @@ plot_uk_visa(visa_uk_dec, year_ending = "December 2023",
              show_cost = F)
 ```
 
-### Test 2024
+### Year Ending December 2024
 
 ```{r}
 #| fig-width: 10
 #| fig-height: 9
-plot_uk_visa(visa_uk_dec, year_ending = "December 2023",
+plot_uk_visa(visa_uk_dec2024, year_ending = "December 2024",
              show_cost = F)
 ```
 

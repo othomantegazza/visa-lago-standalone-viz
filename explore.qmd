@@ -83,12 +83,14 @@ gdp_c <-
     GDP_per_capita_eq_2019 = x2019,
     GDP_per_capita_eq_2021 = x2021,
     GDP_per_capita_eq_2022 = x2022,
+    GDP_per_capita_eq_2023 = x2023,
   ) %>% 
   pivot_longer(
     cols = c(
       GDP_per_capita_eq_2019,
       GDP_per_capita_eq_2021,
-      GDP_per_capita_eq_2022
+      GDP_per_capita_eq_2022,
+      GDP_per_capita_eq_2023
     ),
     names_to = 'year',
     values_to = 'gdp_per_capita'
@@ -147,6 +149,12 @@ read_and_clean_visa_stats <- function(path) {
   return(visa)
 }
 
+visa_2024 <- 
+  read_and_clean_visa_stats(
+    ## NEEDS UPDATE
+    'data/visa/2023-schengen-visa-statistics-consulates_en.xlsx.xlsx'
+  )
+
 visa_2023 <- 
   read_and_clean_visa_stats(
     'data/visa/2023-schengen-visa-statistics-consulates_en.xlsx.xlsx'
@@ -173,6 +181,7 @@ exempt <-
            )
   )
 
+## NEEDS CHECK
 schengen_states <- 
   visa_2022 %>% 
   select(schengen_state,
@@ -181,6 +190,7 @@ schengen_states <-
   rename(country_name = schengen_state,
          country_code = schengen_state_code)
 
+## NEEDS CHECK
 eu_27 <- 
   read_csv('data/utils/eu-eurostat-codes.csv') %>% 
   mutate(country_code = country %>% 
@@ -283,6 +293,11 @@ model_country_level <- function(visa_stats,
   
   return(country_level)
 }
+
+country_level_2024 <-
+  model_country_level(
+    visa_2024,
+    gdp_c %>% filter(year == 2023))
 
 country_level_2023 <-
   model_country_level(
