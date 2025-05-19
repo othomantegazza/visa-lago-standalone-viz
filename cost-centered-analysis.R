@@ -10,7 +10,7 @@ library(glue)
 theme_set(theme_minimal())
 
 schengen_2023 <- 
-  read_csv("data/2023-country-level-clean.csv")
+  read_csv("data/formatted/2023-country-level-clean.csv")
 
 visa_cost <- 80 # euro
 size_scale <- 2.8455
@@ -371,17 +371,16 @@ cb_palette <-
     Oceania = '#AA3377')
 
 visa_uk_mar <- 
-  read_tsv('data/UK-visas-summary-mar-2023-tables.tsv')
+  read_tsv('data/visaUK/UK-visas-summary-mar-2023-tables.tsv')
 
 visa_uk_dec <- 
-  read_tsv('data/UK-visas-summary-dec-2023-tables.tsv')
+  read_tsv('data/visaUK/UK-visas-summary-dec-2023-tables.tsv')
 
-custom_currency_scale_uk <- 
-  scales::label_currency(
-    prefix = "£ ",
-    accuracy = .1,
-    scale_cut = c(M=1e6)#scales::cut_short_scale()
-  )
+custom_currency_scale_uk <- scales::label_currency(
+  prefix = "£ ",
+  accuracy = 0.1,
+  scale_cut = scales::cut_short_scale()
+)
 
 plot_uk_visa <- function(visa_uk, 
                          year_ending = "March 2023",
@@ -451,13 +450,14 @@ plot_uk_visa <- function(visa_uk,
               "Algeria",
               "Bangladesh",
               "Ghana",
-              "Morocco"
+              "Morocco",
+              "Iraq"
             )
           ),
         aes(
           x = rej_rate,
           label = paste(
-            refusal %>% `*`(100) %>% map_chr(custom_currency_scale_uk)
+            refusal %>% `*`(115000) %>% map_chr(custom_currency_scale_uk)
           ),
           hjust = -.2 - (resolved/max(resolved))/4
         ),
@@ -486,19 +486,140 @@ plot_uk_visa <- function(visa_uk,
   return(p)
 }
 
-p_uk <- plot_uk_visa(visa_uk_dec, year_ending = "December 2023")
+p_uk <- plot_uk_visa(visa_uk_dec2024, year_ending = "December 2024")
+
+plot_schengen_visa <- function(visa_uk, 
+                         year_ending = "2024",
+                         show_cost = TRUE) {
+  
+  visa_uk <- 
+    visa_uk %>% 
+    mutate(grant_rate = grant_rate %>% str_remove('%') %>% as.numeric()) %>% 
+    mutate(grant_rate = grant_rate/100,
+           rej_rate = 1-grant_rate) 
+  
+  p <-
+    visa_uk %>% 
+    arrange(desc(rej_rate)) %>% 
+    mutate(nationality = nationality %>% as_factor()) %>% 
+    ggplot() +
+    aes(y = nationality,
+        x = rej_rate) +
+    geom_segment(aes(yend = after_stat(y),
+                     xend = 0),
+                 linewidth = .5,
+                 lty = '11') +
+    geom_point(aes(size = resolved,
+                   fill = "white"),
+               alpha = 1,
+               pch = 21) +
+    geom_vline(xintercept = 0,
+               linewidth = 1.5) +
+    labs(x = "Visa Rejection Rate",
+         y = "Nationality",
+         size = "Size:\nApplications Received",
+         title = "Schengen Visitor Visa Rejection Rate by Nationality (Africa)",
+         subtitle = glue::glue("Year {year_ending}")) +
+    guides(fill = guide_legend(override.aes = list(size = 5)),
+           size = guide_legend(override.aes = list(shape = 21,
+                                                   fill = "white"))) +
+    scale_x_continuous(limits = c(0, 1.05),
+                       labels = scales::percent,
+                       expand = expansion(0, 0),
+                       breaks = c(0, .2, .4, .6, .8, 1)) +
+    scale_size_continuous(range = c(0, 15),
+                          labels = scales::comma) +
+    scale_fill_manual(values = c("#228833")) +
+    theme_minimal(base_size = text_size*size_scale) +
+    theme(panel.grid.major.y = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.grid.major.x = element_line(colour = 'black',
+                                            size = .1),
+          # axis.title = element_text(hjust = 1),
+          # legend.justification = "top"
+    )
+  
+  if(show_cost) {
+    p <-
+      p +
+      geom_text_repel(
+        data = . %>%
+          filter(
+            nationality %in% c(
+              "Nigeria",
+              "Pakistan",
+              "Albania",
+              "Algeria",
+              "Bangladesh",
+              "Ghana",
+              "Morocco",
+              "Iraq"
+            )
+          ),
+        aes(
+          x = rej_rate,
+          label = paste(
+            refusal %>% `*`(90000) %>% map_chr(custom_currency_scale_uk)
+          ),
+          hjust = -.2 - (resolved/max(resolved))/4
+        ),
+        colour = 'black',
+        min.segment.length = 0, 
+        nudge_x = .03,
+        size = 3,
+        direction = 'y',
+        force = .1, 
+        segment.size = 0.2
+      ) 
+  }
+  
+  # p <- ggplotGrob(p)
+  
+  # grid.newpage()
+  # grid.draw(p)
+  # grid.text(x = 0.76,
+  #           y = 0.4,
+  #           gp = gpar(fontsize = 12),
+  #           label = str_wrap(
+  #             glue::glue("Visitor visa applications and outcomes, by nationality, in the year ending {year_ending}. Top 20 nationalities applying for visitor visas in the year. Data relates to entry clearance visa applications made outside the UK. Includes main applicants and dependants."),
+  #             width = 28),
+  #           hjust = 0,
+  #           vjust = 1)
+  return(p)
+}
+
+schengen_2024_formatted <- country_level_2024 %>%
+  filter(consulate_country_continent == "Africa") %>%
+  select(consulate_country, tot_request, issued, ratio_rejected) %>%
+  rename(
+    nationality = consulate_country,
+    resolved = tot_request,
+    granted = issued
+  ) %>%
+  mutate(applications = resolved) %>%
+  filter(ratio_rejected > 0.3) %>%
+  mutate(grant_rate = sprintf("%.0f%%", (1 - ratio_rejected) * 100)) %>%
+  select(-ratio_rejected) %>%
+  mutate(refusal = resolved - granted) 
+
+  
+
+p_schengen <- plot_schengen_visa(schengen_2024_formatted, year_ending = "2024")
 
 ggsave(
-  filename = "output/uk-for-cost-analysis.jpeg",
-  plot = p_uk,
+  filename = "output/schengen-for-cost-analysis.jpeg",
+  plot = p_schengen,
   height = 8,
   width = 8
 )
 
 
+
+
+
 # rejection rate model ------------------------------------------
 
-country_level_2023 <- read_csv("data/2023-country-level-clean.csv")
+country_level_2023 <- read_csv("data/formatted/2023-country-level-clean.csv")
 
 
 cb_palette <- 

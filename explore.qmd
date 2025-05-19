@@ -151,8 +151,7 @@ read_and_clean_visa_stats <- function(path) {
 
 visa_2024 <- 
   read_and_clean_visa_stats(
-    ## NEEDS UPDATE
-    'data/visa/2023-schengen-visa-statistics-consulates_en.xlsx.xlsx'
+    'data/visa/2024-schengen-visa-statistics-consulates_en.xlsx'
   )
 
 visa_2023 <- 
@@ -181,16 +180,15 @@ exempt <-
            )
   )
 
-## NEEDS CHECK
+
 schengen_states <- 
-  visa_2022 %>% 
+  visa_2024 %>% 
   select(schengen_state,
          schengen_state_code) %>% 
   distinct() %>% 
   rename(country_name = schengen_state,
          country_code = schengen_state_code)
 
-## NEEDS CHECK
 eu_27 <- 
   read_csv('data/utils/eu-eurostat-codes.csv') %>% 
   mutate(country_code = country %>% 
@@ -476,6 +474,18 @@ plot_model(country_level_2022_exempt,
            gdp_year = 2021,
            title = "Schengen Visa Rejection Rate in 2022 - Exempt States",
            model = FALSE)
+```
+
+```{r}
+#| column: screen-inset-right
+#| fig-width: 10
+
+set.seed(1);plot_model(
+  country_level_2024,
+  year = 2024,
+  gdp_year = 2023,
+  title = "Schengen Visa Rejection Rate in 2024"
+)
 ```
 
 ```{r}

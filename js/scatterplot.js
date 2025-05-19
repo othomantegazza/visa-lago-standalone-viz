@@ -29,7 +29,7 @@ function Scatterplot(data, {
     xFormat, // a format specifier string for the x-axis
     yType = d3.scaleLinear, // type of y-scale
     yDomain, // [ymin, ymax]
-    yLabel = "↑ Percent of Application Rejected [%]", // a label for the y-axis
+    yLabel = "↑ Percent of Application Rejected [%]  -  European Commission data, analysis and chart @LAGOCollective", // a label for the y-axis
     yFormat, // a format specifier string for the y-axis
     rType = d3.scaleLinear,
     rDomain,

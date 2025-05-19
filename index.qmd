@@ -39,7 +39,18 @@ country_level_2023 %>%
   # ) %>% 
   write_csv('data/formatted/2023-country-level-clean.csv')
 
-## NEEDS UPDATE
+
+country_level_2024 %>% 
+  # select(
+  #   consulate_country,
+  #   consulate_country_code,
+  #   consulate_country_continent,
+  #   tot_request,
+  #   gdp_per_capita,
+  #   ratio_rejected,
+  #   fitted = .fitted
+  # ) %>% 
+  write_csv('data/formatted/2024-country-level-clean.csv')
 
 ```
 
@@ -78,7 +89,6 @@ ojs_define(
   }
 )
 
-## NEEDS UPDATE
 ojs_define(
   country_level_2024 = country_level_2024 %>% 
     select(
@@ -353,7 +363,7 @@ plot_uk_visa <- function(visa_uk,
             y = 0.10,
             gp = gpar(fontsize = 8),
             label = str_wrap(
-              "Data from www.gov.uk",
+              "Data from www.gov.uk, analysis and chart @LAGOCollective",
               width = 28),
             hjust = 0,
             vjust = 1)
