@@ -407,7 +407,7 @@ plot_uk_visa(visa_uk_dec2024, year_ending = "December 2024",
 
 ## Access to the Data
 
-The dataset utilised for the analysis of short-term visa regimes is available [here](https://docs.google.com/spreadsheets/d/1Cy6cpS03LtGuitxJVjffzyTMEdkRrECj/). It includes rejection rates and the associated costs of rejections for both Schengen and UK visa applications. When referencing this analysis, please acknowledge Marta Foresti - Founder, LAGO Collective & Visiting Senior Fellow, ODI and Otho Mantegazza - Research Scientist, Data Analyst.
+The dataset utilised for the analysis of short-term visa regimes is available [here](https://docs.google.com/spreadsheets/d/1Cy6cpS03LtGuitxJVjffzyTMEdkRrECj/). It includes rejection rates and the associated costs of rejections for both Schengen and UK visa applications. When referencing this analysis, please acknowledge Marta Foresti - Founder, LAGO Collective & Visiting Senior Fellow, ODI, Otho Mantegazza - Research Scientist, Data Analyst and Verdiana Pasqualini - Data Analyst.
 
 The original data is sourced from:
 
